@@ -1,4 +1,4 @@
-package com.yourorganization.maven_sample;
+package com.javeriana.edu.co;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.StaticJavaParser;
@@ -10,7 +10,6 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.resolution.types.ResolvedType;
-import com.yourorganization.maven_sample.model.ClassA;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -18,12 +17,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.regex.*;
 
-public class LogicPositivizer {
+public class Main {
 
   private static final String FILE_PATH = "C:/Users/nelso/Downloads/javaparser-maven-sample-master/src/main/resources/ExampleA.java";
 
   public static void main(String[] args) throws Exception {
-    CompilationUnit cu = StaticJavaParser.parse(new File(FILE_PATH));
+     System.out.println("Hola mundo");
+    /*CompilationUnit cu = StaticJavaParser.parse(new File(FILE_PATH));
     VoidVisitor<Void> methodNameVisitor = new MethodNamePrinter();
     methodNameVisitor.visit(cu, null);
 
@@ -45,9 +45,9 @@ public class LogicPositivizer {
     comments.forEach(System.out::println);
 
     getTypeOfReference();
-    
+
     ClassA a = new ClassA(20);
-    System.out.println(a.getEdad());
+    System.out.println(a.getEdad());*/
   }
 
   private static class MethodNamePrinter extends VoidVisitorAdapter<Void> {
