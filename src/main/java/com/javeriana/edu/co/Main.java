@@ -14,7 +14,10 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.Properties;
 import java.util.regex.*;
 
 public class Main {
@@ -22,7 +25,25 @@ public class Main {
   private static final String FILE_PATH = "C:/Users/nelso/Downloads/javaparser-maven-sample-master/src/main/resources/ExampleA.java";
 
   public static void main(String[] args) throws Exception {
-     System.out.println("Hola mundo");
+    System.out.println("ToyFuncionando");    
+    String borrame = "C:\\Users\\prado\\OneDrive\\Documentos\\TG\\spring-petclinic-master";
+    
+    if(/*args.length > 0*/ true) {
+
+        Properties properties= new Properties();
+        try {
+            File f = new File(System.getProperty("user.dir")+"\\configuracion.properties");
+            properties.load(new FileInputStream(f));     
+            properties.setProperty("INPUTPATH", borrame);
+            properties.store(new FileOutputStream(f), null);
+            //if(args[0] != null)                
+                //properties.setProperty("INPUTPATH", args[0]);
+        } catch (Exception e) {
+            
+        }
+    }
+    
+    CreadorProyectoMicro c = new CreadorProyectoMicro("MicroPet");
     /*CompilationUnit cu = StaticJavaParser.parse(new File(FILE_PATH));
     VoidVisitor<Void> methodNameVisitor = new MethodNamePrinter();
     methodNameVisitor.visit(cu, null);
