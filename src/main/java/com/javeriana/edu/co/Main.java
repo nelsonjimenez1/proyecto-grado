@@ -26,7 +26,7 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     System.out.println("ToyFuncionando");    
-    String borrame = "C:\\Users\\prado\\OneDrive\\Documentos\\TG\\spring-petclinic-master";
+    String borrame = "C:\\Users\\nelso\\Downloads\\TG\\spring-petclinic-master";
     
     if(/*args.length > 0*/ true) {
 
