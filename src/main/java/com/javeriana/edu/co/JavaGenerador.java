@@ -44,18 +44,18 @@ public class JavaGenerador {
         }
     }
 
-    public void modificarRegiter(String nombreMicroServicio, String ruta) {
+    public void modificarRegiter(String nombreMicroServicio, String rutaGroupID) {
         try {
             
             CompilationUnit cu = StaticJavaParser.parse(new File(System.getProperty("user.dir") + "\\templates\\RegistrationServer.java"));
-            cu.setPackageDeclaration(this.groupID + ".services.registration");
-            FileWriter myWriter = new FileWriter(System.getProperty("user.dir") + "\\output\\" + nombreMicroServicio + "\\src\\main\\java" + ruta+ "\\services\\register\\RegistrationServer.java");
+            cu.setPackageDeclaration(this.groupID + ".services.register");
+            FileWriter myWriter = new FileWriter(System.getProperty("user.dir") + "\\output\\" + nombreMicroServicio + "\\src\\main\\java" + rutaGroupID+ "\\services\\register\\RegistrationServer.java");
             myWriter.write(cu.toString());
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(JavaGenerador.class.getName()).log(Level.SEVERE, null, ex);
+            myWriter.close();
         } catch (IOException ex) {
             Logger.getLogger(JavaGenerador.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            System.out.println(ex.getMessage());
+        } 
     }
 
     private static class MethodNameCollector extends VoidVisitorAdapter<List<String>> {

@@ -31,7 +31,7 @@ public class CreadorProyectoMicro {
     public String microName;
     public XMLUtils xmlU;
     public JavaGenerador generador;
-    public String ruta;
+    public String rutaGroupID;
 
     public CreadorProyectoMicro(String microName) {
         xmlU = new XMLUtils();
@@ -49,6 +49,7 @@ public class CreadorProyectoMicro {
             crearResources();
             copiarCarpetasAuxiliares();
             generarArchivos();
+            modificarRegister();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -71,7 +72,6 @@ public class CreadorProyectoMicro {
             File directorio = new File(System.getProperty("user.dir") + "\\output" + ruta + "\\" + sc);
             directorio.mkdir();
         }
-        this.ruta = ruta;
     }
 
     public void crearCarpetasGroupID() {
@@ -84,9 +84,12 @@ public class CreadorProyectoMicro {
             File directorio = new File(System.getProperty("user.dir") + "\\output\\" + this.microName + "\\src\\main\\java" + ruta);
             directorio.mkdir();
         }
-        File directorio = new File(System.getProperty("user.dir") + "\\output\\" + this.microName + "\\src\\main\\java" + ruta + "\\services\\register");
-        directorio.mkdir();
         
+        this.rutaGroupID = ruta;
+        File directorio = new File(System.getProperty("user.dir") + "\\output\\" + this.microName + "\\src\\main\\java" + ruta + "\\services");
+        directorio.mkdir();
+        directorio = new File(System.getProperty("user.dir") + "\\output\\" + this.microName + "\\src\\main\\java" + ruta + "\\services\\register");
+        directorio.mkdir();
     }
 
     public void generarPOM() {
@@ -179,16 +182,10 @@ public class CreadorProyectoMicro {
     }
     private void generarArchivos(){
         ArrayList<String> lista = new ArrayList<String>();
-        String[] split = groupID.split("\\.");
-        String ruta = "";
-    
-        for (String s : split) {
-            ruta += "\\" + s;
-        }
-        lista.add(System.getProperty("user.dir") + "\\output\\" + this.microName + "\\src\\main\\java" + ruta+ "\\services\\register\\RegistrationServer.java"); 
+        lista.add(System.getProperty("user.dir") + "\\output\\" + this.microName + "\\src\\main\\java" + rutaGroupID+ "\\services\\register\\RegistrationServer.java"); 
         this.crearArchivos(lista);
     }
     private void modificarRegister(){
-        this.generador.modificarRegiter(microName, ruta);
+        this.generador.modificarRegiter(microName, rutaGroupID);
     }
 }
