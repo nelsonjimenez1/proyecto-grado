@@ -26,34 +26,37 @@ import java.util.logging.Logger;
  *
  * @author PC
  */
-public class JavaGenerador {
+public class JavaGenerator {
 
     public String groupID;
-    public String rutaInput;
-
-    public JavaGenerador() {
+    public String routInput;
+    public static String fileSeparator = File.separator;
+    public JavaGenerator() {
 
         Properties properties = new Properties();
         try {
-            File f = new File(System.getProperty("user.dir") + "\\configuracion.properties");
+            File f = new File(System.getProperty("user.dir") + fileSeparator +"configuracion.properties");
             properties.load(new FileInputStream(f));
             groupID = properties.getProperty("GROUPID");
-            rutaInput = properties.getProperty("INPUTPATH");
+            routInput = properties.getProperty("INPUTPATH");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public void modificarRegiter(String nombreMicroServicio, String rutaGroupID) {
+    public void updateRegiter(String nameMicroService, String routeGroupID) {
         try {
-            
-            CompilationUnit cu = StaticJavaParser.parse(new File(System.getProperty("user.dir") + "\\templates\\RegistrationServer.java"));
+            String[] splitRegistrationServer = {"templates","RegistrationServer.java"};
+            String[] splitRegistrationServerWrite = {"output",nameMicroService,"src","main","java",routeGroupID,"services","register","RegistrationServer.java"};
+            String path = String.join(fileSeparator, splitRegistrationServer);
+            String pathWriteFile = String.join(fileSeparator, splitRegistrationServerWrite);
+            CompilationUnit cu = StaticJavaParser.parse(new File(System.getProperty("user.dir") , path));
             cu.setPackageDeclaration(this.groupID + ".services.register");
-            FileWriter myWriter = new FileWriter(System.getProperty("user.dir") + "\\output\\" + nombreMicroServicio + "\\src\\main\\java" + rutaGroupID+ "\\services\\register\\RegistrationServer.java");
+            FileWriter myWriter = new FileWriter(System.getProperty("user.dir")+ fileSeparator+ pathWriteFile);
             myWriter.write(cu.toString());
             myWriter.close();
         } catch (IOException ex) {
-            Logger.getLogger(JavaGenerador.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JavaGenerator.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ex.getMessage());
         } 
     }

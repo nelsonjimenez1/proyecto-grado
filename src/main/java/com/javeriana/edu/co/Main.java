@@ -23,16 +23,17 @@ import java.util.regex.*;
 public class Main {
 
   private static final String FILE_PATH = "C:/Users/nelso/Downloads/javaparser-maven-sample-master/src/main/resources/ExampleA.java";
-
+  public static String fileSeparator = File.separator;
+  
   public static void main(String[] args) throws Exception {
     System.out.println("ToyFuncionando");    
-    String borrame = "C:\\Users\\nelso\\Downloads\\TG\\spring-petclinic-master";
+    String borrame = "C:\\Tools\\spring-petclinic-master";
     
     if(/*args.length > 0*/ true) {
 
         Properties properties= new Properties();
         try {
-            File f = new File(System.getProperty("user.dir")+"\\configuracion.properties");
+            File f = new File(System.getProperty("user.dir")+fileSeparator+"configuracion.properties");
             properties.load(new FileInputStream(f));     
             properties.setProperty("INPUTPATH", borrame);
             properties.store(new FileOutputStream(f), null);
@@ -43,7 +44,7 @@ public class Main {
         }
     }
     
-    CreadorProyectoMicro c = new CreadorProyectoMicro("MicroPet");
+    CreateProyectMicroServices c = new CreateProyectMicroServices("MicroPet");
     /*CompilationUnit cu = StaticJavaParser.parse(new File(FILE_PATH));
     VoidVisitor<Void> methodNameVisitor = new MethodNamePrinter();
     methodNameVisitor.visit(cu, null);
