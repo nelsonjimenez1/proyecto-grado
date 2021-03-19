@@ -27,11 +27,11 @@ import org.apache.commons.io.FileUtils;
 public class CreateProyectMicroServices {
 
     public String groupID;
-    public String routInput;
+    public String rootInput;
     public String microName;
     public XMLUtils xmlU;
     public JavaGenerator generator;
-    public String routGroupID;
+    public String rootGroupID;
     public static String fileSeparator = File.separator;
 
     public CreateProyectMicroServices(String microName) {
@@ -41,7 +41,7 @@ public class CreateProyectMicroServices {
             File f = new File(System.getProperty("user.dir"),"configuracion.properties");
             properties.load(new FileInputStream(f));
             groupID = properties.getProperty("GROUPID");
-            routInput = properties.getProperty("INPUTPATH");
+            rootInput = properties.getProperty("INPUTPATH");
             this.microName = microName;
             this.generator = new JavaGenerator();
             createBasicFolders();
@@ -80,19 +80,19 @@ public class CreateProyectMicroServices {
     public void createFolderGroupID() {
 
         String[] split = groupID.split("\\.");
-        String rout = "";
+        String root = "";
         //String path = String.join(fileSeparator, split);
         
         String[] splitPath = {System.getProperty("user.dir"),"output" ,this.microName,"src","main","java"};
         String path = String.join(fileSeparator, splitPath);
         for (String s : split) {
-            rout += fileSeparator + s;
-            File directory = new File(path+ rout);
+            root += fileSeparator + s;
+            File directory = new File(path+ root);
             directory.mkdir();
         }
         
-        this.routGroupID = rout;
-        String[] splitPathDirectory = {System.getProperty("user.dir"),"output" ,this.microName,"src","main","java",rout,"services"};
+        this.rootGroupID = root;
+        String[] splitPathDirectory = {System.getProperty("user.dir"),"output" ,this.microName,"src","main","java",root,"services"};
         String pathDirectory = String.join(fileSeparator, splitPathDirectory);
         File directory = new File(pathDirectory);
         directory.mkdir();
@@ -115,7 +115,7 @@ public class CreateProyectMicroServices {
     }
 
     public void addDependencies(Document dOutput) {
-        Document dInput = xmlU.openXMLFile(routInput + fileSeparator+ "pom.xml");
+        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator+ "pom.xml");
         ArrayList<Node> nodos = xmlU.readXMLNodes(dInput, "/project/dependencies/dependency");
 
         for (Node nodo : nodos) {
@@ -124,7 +124,7 @@ public class CreateProyectMicroServices {
     }
 
     public void addPlugins(Document dOutput) {
-        Document dInput = xmlU.openXMLFile(routInput + fileSeparator+ "pom.xml");
+        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator+ "pom.xml");
         ArrayList<Node> nodos = xmlU.readXMLNodes(dInput, "/project/plugins/plugin");
 
         for (Node nodo : nodos) {
@@ -133,7 +133,7 @@ public class CreateProyectMicroServices {
     }
 
     private void updateGroupId_ArtifactID(Document dOutput) {
-        Document dInput = xmlU.openXMLFile(routInput + fileSeparator+ "pom.xml");
+        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator+ "pom.xml");
         ArrayList<Node> nodoGroupId = xmlU.readXMLNodes(dInput, "/project/groupId");
         ArrayList<Node> nodoArtifactID = xmlU.readXMLNodes(dInput, "/project/artifactId");
         xmlU.removeNodes(dOutput, "/project/groupId");
@@ -144,7 +144,7 @@ public class CreateProyectMicroServices {
     }
 
     private void createResources() {
-        String[] splitOne = {routInput,"src","main","resources"};
+        String[] splitOne = {rootInput,"src","main","resources"};
         String pathOne = String.join(fileSeparator, splitOne);
         String[] splitTwo = {System.getProperty("user.dir"),"output", microName,"src","main"};
         String pathTwo = String.join(fileSeparator, splitTwo);
@@ -163,8 +163,8 @@ public class CreateProyectMicroServices {
     }
 
     private void copyAuxiliaryFolders() {
-        ArrayList<File> list = listDirectory(routInput +fileSeparator+"src"+fileSeparator+"main");
-        String[] split = {routInput,"src","main"};
+        ArrayList<File> list = listDirectory(rootInput +fileSeparator+"src"+fileSeparator+"main");
+        String[] split = {rootInput,"src","main"};
         String path = String.join(fileSeparator, split);
         String[] splitMicro = {"output",microName,"src","main"};
         String pathMicro = String.join(fileSeparator, splitMicro);
@@ -187,27 +187,27 @@ public class CreateProyectMicroServices {
         return listFilesOrigin;
     }
 
-    private void createFileByRout(String ruta) {
+    private void createFileByRoot(String root) {
         try {
-            File directorio = new File(ruta);
+            File directorio = new File(root);
             directorio.createNewFile();
         } catch (IOException ex) {
             Logger.getLogger(CreateProyectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    private void createFiles(ArrayList<String>routList){
-        for (String rout : routList) {
-            this.createFileByRout(rout);
+    private void createFiles(ArrayList<String>rootList){
+        for (String root : rootList) {
+            this.createFileByRoot(root);
         }
     }
     private void generateFiles(){
         ArrayList<String> list = new ArrayList<String>();
-        String[] split = {"output",this.microName,"src","main","java",routGroupID,"services","register","RegistrationServer.java"};
+        String[] split = {"output",this.microName,"src","main","java",rootGroupID,"services","register","RegistrationServer.java"};
         String path = String.join(fileSeparator, split);
         list.add(System.getProperty("user.dir")+fileSeparator+  path); 
         this.createFiles(list);
     }
     private void updateRegister(){
-        this.generator.updateRegiter(microName, routGroupID);
+        this.generator.updateRegiter(microName, rootGroupID);
     }
 }

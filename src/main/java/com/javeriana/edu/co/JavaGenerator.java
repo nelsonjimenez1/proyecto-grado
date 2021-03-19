@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 public class JavaGenerator {
 
     public String groupID;
-    public String routInput;
+    public String rootInput;
     public static String fileSeparator = File.separator;
     public JavaGenerator() {
 
@@ -38,16 +38,16 @@ public class JavaGenerator {
             File f = new File(System.getProperty("user.dir") + fileSeparator +"configuracion.properties");
             properties.load(new FileInputStream(f));
             groupID = properties.getProperty("GROUPID");
-            routInput = properties.getProperty("INPUTPATH");
+            rootInput = properties.getProperty("INPUTPATH");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public void updateRegiter(String nameMicroService, String routeGroupID) {
+    public void updateRegiter(String nameMicroService, String rooteGroupID) {
         try {
             String[] splitRegistrationServer = {"templates","RegistrationServer.java"};
-            String[] splitRegistrationServerWrite = {"output",nameMicroService,"src","main","java",routeGroupID,"services","register","RegistrationServer.java"};
+            String[] splitRegistrationServerWrite = {"output",nameMicroService,"src","main","java",rooteGroupID,"services","register","RegistrationServer.java"};
             String path = String.join(fileSeparator, splitRegistrationServer);
             String pathWriteFile = String.join(fileSeparator, splitRegistrationServerWrite);
             CompilationUnit cu = StaticJavaParser.parse(new File(System.getProperty("user.dir") , path));

@@ -26,7 +26,7 @@ public class Main {
   public static String fileSeparator = File.separator;
   
   public static void main(String[] args) throws Exception {
-    System.out.println("ToyFuncionando");    
+    
     String borrame = "C:\\Tools\\spring-petclinic-master";
     
     if(/*args.length > 0*/ true) {
@@ -45,31 +45,9 @@ public class Main {
     }
     
     CreateProyectMicroServices c = new CreateProyectMicroServices("MicroPet");
-    /*CompilationUnit cu = StaticJavaParser.parse(new File(FILE_PATH));
-    VoidVisitor<Void> methodNameVisitor = new MethodNamePrinter();
-    methodNameVisitor.visit(cu, null);
-
-    List<String> methodNames = new ArrayList<>();
-    VoidVisitor<List<String>> methodNameCollector = new MethodNameCollector();
-    methodNameCollector.visit(cu, methodNames);
-    methodNames.forEach(n -> System.out.println("Method Name Collected "+ n));
-
-    ModifierVisitor<Void> numericLiteralVisitor = new IntegerLiteralModifier();
-    numericLiteralVisitor.visit(cu, null);
-    System.out.println(cu.toString());
-
-    List<CommentReportEntry> comments = cu.getAllContainedComments().stream()
-      .map(p-> new CommentReportEntry(p.getClass().getSimpleName(),
-                                        p.getContent(),
-                                        p.getRange().map(r -> r.begin.line).orElse(-1),
-                                        !p.getCommentedNode().isPresent()))
-      .collect(Collectors.toList());
-    comments.forEach(System.out::println);
-
-    getTypeOfReference();
-
-    ClassA a = new ClassA(20);
-    System.out.println(a.getEdad());*/
+    CreateProyectMicroRegister r = new CreateProyectMicroRegister(); 
+    
+    System.out.println("ToyFuncionando");    
   }
 
   private static class MethodNamePrinter extends VoidVisitorAdapter<Void> {
