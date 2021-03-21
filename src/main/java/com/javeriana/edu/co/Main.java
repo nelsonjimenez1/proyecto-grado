@@ -24,15 +24,19 @@ public class Main {
 
   private static final String FILE_PATH = "C:/Users/nelso/Downloads/javaparser-maven-sample-master/src/main/resources/ExampleA.java";
   public static String fileSeparator = File.separator;
+ 
   
   public static void main(String[] args) throws Exception {
-    
-    String borrame = "C:\\Tools\\spring-petclinic-master";
-    
+    Graph graph = new Graph();
+    //cambiar ruta
+    String borrame = "C:\\Users\\PC\\Desktop\\spring-petclinic-master";
+   
     if(/*args.length > 0*/ true) {
 
         Properties properties= new Properties();
         try {
+            graph.loadNodes();
+            graph.loadConnections();
             File f = new File(System.getProperty("user.dir")+fileSeparator+"configuracion.properties");
             properties.load(new FileInputStream(f));     
             properties.setProperty("INPUTPATH", borrame);
@@ -40,14 +44,14 @@ public class Main {
             //if(args[0] != null)                
                 //properties.setProperty("INPUTPATH", args[0]);
         } catch (Exception e) {
-            
+            System.out.println(e.getMessage());   
         }
     }
     
     CreateProyectMicroServices c = new CreateProyectMicroServices("MicroPet");
     CreateProyectMicroRegister r = new CreateProyectMicroRegister(); 
     
-    System.out.println("ToyFuncionando");    
+    System.out.println("ToyFuncionando guiño guiño");    
   }
 
   private static class MethodNamePrinter extends VoidVisitorAdapter<Void> {
