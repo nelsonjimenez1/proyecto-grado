@@ -34,7 +34,7 @@ public class CreateProyectMicroServices {
     public String rootGroupID;
     public static String fileSeparator = File.separator;
 
-    public CreateProyectMicroServices(String microName) {
+    public CreateProyectMicroServices(String microName, Graph graph) { // Modified
         xmlU = new XMLUtils();
         Properties properties = new Properties();
         try {
@@ -43,7 +43,7 @@ public class CreateProyectMicroServices {
             groupID = properties.getProperty("GROUPID");
             rootInput = properties.getProperty("INPUTPATH");
             this.microName = microName;
-            this.generator = new JavaGenerator();
+            this.generator = new JavaGenerator(rootInput, graph); // Modified
             createBasicFolders();
             createFolderGroupID();
             createPOM();

@@ -7,6 +7,8 @@ package com.javeriana.edu.co;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.google.common.io.Files;
@@ -17,6 +19,8 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -31,8 +35,12 @@ public class JavaGenerator {
     public String groupID;
     public String rootInput;
     public static String fileSeparator = File.separator;
-    public JavaGenerator() {
+    private Graph graph; // Modified
+    
+    public JavaGenerator(String rootInput, Graph graph) { // Modified
 
+        this.rootInput = rootInput;
+        this.graph = graph;
         Properties properties = new Properties();
         try {
             File f = new File(System.getProperty("user.dir") + fileSeparator +"configuracion.properties");
@@ -59,6 +67,75 @@ public class JavaGenerator {
             Logger.getLogger(JavaGenerator.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ex.getMessage());
         } 
+    }
+    
+    // New
+    public void createClass(String classId) {
+        
+        Node classNode = this.graph.getNodeByNodeId(classId);       
+        
+        String[] split = {rootInput, "src","main","java"};
+        String[] split2 = classNode.getPackageName().split("\\.");
+        
+        split = concatV(split, split2);        
+        String[] split3 = {classNode.getName()};        
+        split = concatV(split, split3);
+        
+        String path = String.join(fileSeparator, split);                
+        
+        try {
+            CompilationUnit originalCu = StaticJavaParser.parse(new File(path));            
+            CompilationUnit newCu = new CompilationUnit();
+            
+            originalCu.getImports().forEach(imp -> newCu.addImport(imp));            
+            newCu.setPackageDeclaration(originalCu.getPackageDeclaration().get());            
+            
+            originalCu.findAll(ClassOrInterfaceDeclaration.class).forEach(declaration -> {
+                
+                if(declaration.getClass().getName().equals(classNode.getName())) {
+                    ClassOrInterfaceDeclaration aux = newCu.addClass(declaration.getClass().getName());                    
+                    addMethodsToClass(declaration, aux, classNode);
+                }                                                     
+            });
+            
+        } catch (Exception e) {
+            
+        }
+    }
+    
+    // New    
+    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Node classNode) {
+        ArrayList<Node> methods = this.graph.getNodeElementsSameMicroserviceBySrcNodeId("Calls", classNode.getId(), classNode.getMicroservice());
+        
+        originalClass.findAll(MethodDeclaration.class).forEach(n -> {
+            // TODO
+        });
+        
+        for (Node method : methods) {
+            
+        }
+    }
+    
+    // New
+    private void addFieldsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Node classNode) {
+        ArrayList<Node> fields = this.graph.getNodeElementsSameMicroserviceBySrcNodeId("Has", classNode.getId(), classNode.getMicroservice());
+        
+        originalClass.findAll(FieldDeclaration.class).forEach(n -> {
+            // TODO
+        });
+        
+        for (Node field : fields) {
+            
+        }
+    }
+    
+    private String[] concatV(String[] left, String[] right) {
+        String[] result = new String[left.length + right.length];
+
+        System.arraycopy(left, 0, result, 0, left.length);
+        System.arraycopy(right, 0, result, left.length, right.length);
+
+        return result;
     }
 
     private static class MethodNameCollector extends VoidVisitorAdapter<List<String>> {

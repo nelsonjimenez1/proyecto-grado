@@ -35,8 +35,6 @@ public class Main {
 
         Properties properties= new Properties();
         try {
-            graph.loadNodes();
-            graph.loadConnections();
             File f = new File(System.getProperty("user.dir")+fileSeparator+"configuracion.properties");
             properties.load(new FileInputStream(f));     
             properties.setProperty("INPUTPATH", borrame);
@@ -48,7 +46,7 @@ public class Main {
         }
     }
     
-    CreateProyectMicroServices c = new CreateProyectMicroServices("MicroPet");
+    CreateProyectMicroServices c = new CreateProyectMicroServices("MicroPet", graph); // Modified
     CreateProyectMicroRegister r = new CreateProyectMicroRegister(); 
     
     System.out.println("ToyFuncionando guiño guiño");    
