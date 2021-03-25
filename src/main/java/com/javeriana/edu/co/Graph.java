@@ -7,12 +7,18 @@ package com.javeriana.edu.co;
 
 import static com.javeriana.edu.co.CreateProyectMicroServices.fileSeparator;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -30,70 +36,117 @@ public class Graph {
         loadConnections();
 
     }
-
+    
     public void loadNodes() {
-
-        String[] split = {System.getProperty("user.dir"), "input", "graphNodes.csv"};
-        String csvFile = String.join(fileSeparator, split);
-
-        BufferedReader br = null;
-        String line = "";
-        String cvsSplitBy = ";";
+        String[] split = {System.getProperty("user.dir"), "input", "graph.xsl"};
+        String filename = String.join(fileSeparator, split);
+        
         try {
-            br = new BufferedReader(new FileReader(csvFile));
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(cvsSplitBy);
-                Node node = new Node(data[0], data[1], data[2], data[3], data[4]);
-                this.nodes.put(node.getId(), node);
-                System.out.println(data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3] + ", " + data[4]);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+            FileInputStream fis = new FileInputStream(filename);
+            XSSFWorkbook workBook = new XSSFWorkbook(fis);
+            XSSFSheet hssfsheetNodes = workBook.getSheetAt(0);
+            Iterator rowIterator = hssfsheetNodes.rowIterator();    
+            int row = 0;
+            
+            while(rowIterator.hasNext()) {
+                
+                XSSFRow hssfRow = (XSSFRow) rowIterator.next();
+                
+                if(row == 0) {
+                    row = 1;
+                    continue;
                 }
+                
+                Iterator it = hssfRow.cellIterator();           
+                Node node = new Node();
+
+                int cell = 0;
+                
+                while(it.hasNext()) {
+                    XSSFCell hssfCell = (XSSFCell) it.next();
+                    
+                    switch(cell){
+                        case 0:
+                            node.setId(hssfCell.toString());
+                            break;
+                        case 1:
+                            node.setPackageName(hssfCell.toString());
+                            break;
+                        case 2:
+                            node.setName(hssfCell.toString());
+                            break;
+                        case 3:
+                            node.setLabel(hssfCell.toString());
+                            break;
+                        case 4:
+                            node.setType(hssfCell.toString());
+                            break;
+                        case 5:
+                            node.setSubType(hssfCell.toString());
+                            break;
+                        case 6:
+                            node.setMicroservice(hssfCell.toString());
+                            break;  
+                    }                    
+                    cell++;                    
+                }       
+                this.nodes.put(node.getId(), node);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
     }
-
+    
     public void loadConnections() {
-
-        String[] split = {System.getProperty("user.dir"), "input", "graphEdges.csv"};
-        String csvFile = String.join(fileSeparator, split);
-
-        BufferedReader br = null;
-        String line = "";
-        String cvsSplitBy = ";";
+        String[] split = {System.getProperty("user.dir"), "input", "graph.xsl"};
+        String filename = String.join(fileSeparator, split);
+        
         try {
-            br = new BufferedReader(new FileReader(csvFile));
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(cvsSplitBy);
-                Edge edge = new Edge(data[0], data[1], data[2]);
+            FileInputStream fis = new FileInputStream(filename);
+            XSSFWorkbook workBook = new XSSFWorkbook(fis);
+            XSSFSheet hssfsheetNodes = workBook.getSheetAt(1);
+            Iterator rowIterator = hssfsheetNodes.rowIterator();    
+            int row = 0;
+            
+            while(rowIterator.hasNext()) {
+                
+                XSSFRow hssfRow = (XSSFRow) rowIterator.next();
+                
+                if(row == 0) {
+                    row = 1;
+                    continue;
+                }
+                
+                Iterator it = hssfRow.cellIterator();           
+                Edge edge = new Edge();
+
+                int cell = 0;
+                
+                while(it.hasNext()) {
+                    XSSFCell hssfCell = (XSSFCell) it.next();
+                    
+                    switch(cell){
+                        case 0:
+                            edge.setIdSrc(hssfCell.toString());
+                            break;
+                        case 1:
+                            edge.setIdDest(hssfCell.toString());
+                            break;
+                        case 2:
+                            edge.setTypeRelation(hssfCell.toString());
+                            break;
+                        case 3:
+                            edge.setLabel(hssfCell.toString());
+                            break;
+                    }                    
+                    cell++;                    
+                } 
                 if( this.edges.get(edge.getIdSrc()) == null )   
                     this.edges.put(edge.getIdSrc(),new ArrayList<>());   
-                this.edges.get(edge.getIdSrc()).add(edge); 
-                
-                System.out.println(data[0] + ", " + data[1] + ", " + data[2]);
+                this.edges.get(edge.getIdSrc()).add(edge);
             }
-        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
     

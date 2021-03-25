@@ -70,11 +70,10 @@ public class JavaGenerator {
     }
     
     // New
-    public void createClass(String classId) {
+    // No orientarlo al grafo
+    public void createClass(String classId, Node classNode, ArrayList<Node> methods) {
         
-        Node classNode = this.graph.getNodeByNodeId(classId);       
-        
-        String[] split = {rootInput, "src","main","java"};
+        String[] split = {rootInput, "src", "main", "java"};
         String[] split2 = classNode.getPackageName().split("\\.");
         
         split = concatV(split, split2);        
@@ -94,7 +93,7 @@ public class JavaGenerator {
                 
                 if(declaration.getClass().getName().equals(classNode.getName())) {
                     ClassOrInterfaceDeclaration aux = newCu.addClass(declaration.getClass().getName());                    
-                    addMethodsToClass(declaration, aux, classNode);
+                    addMethodsToClass(declaration, aux, classNode, methods);
                 }                                                     
             });
             
@@ -104,8 +103,7 @@ public class JavaGenerator {
     }
     
     // New    
-    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Node classNode) {
-        ArrayList<Node> methods = this.graph.getNodeElementsSameMicroserviceBySrcNodeId("Calls", classNode.getId(), classNode.getMicroservice());
+    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Node classNode, ArrayList<Node> methods) {
         
         originalClass.findAll(MethodDeclaration.class).forEach(n -> {
             // TODO
