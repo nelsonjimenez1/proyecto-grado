@@ -32,8 +32,8 @@ public class Graph {
     public Graph() { // Modified
         this.nodes = new HashMap<>();
         this.edges = new HashMap<>();
-        loadNodes();
-        loadConnections();
+        //loadNodes();
+        //loadConnections();
 
     }
     
@@ -149,7 +149,7 @@ public class Graph {
             e.printStackTrace();
         }
     }
-    
+
     // New
     public ArrayList<Node> getAllNodes() {
         return (ArrayList<Node>) this.nodes.values();

@@ -29,7 +29,8 @@ public class Main {
   public static void main(String[] args) throws Exception {
     Graph graph = new Graph();
     //cambiar ruta
-    String borrame = "C:\\Users\\PC\\Desktop\\spring-petclinic-master";
+    //String borrame = "C:\\Users\\PC\\Desktop\\spring-petclinic-master";
+    String borrame = "C:\\Users\\prado\\OneDrive\\Documentos\\TG\\spring-petclinic-master"; // Sebastián
    
     if(/*args.length > 0*/ true) {
 

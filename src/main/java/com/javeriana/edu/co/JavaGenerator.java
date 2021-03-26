@@ -7,10 +7,15 @@ package com.javeriana.edu.co;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Modifier.Keyword;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 import com.google.common.io.Files;
 import com.javeriana.edu.co.Utils.XMLUtils;
 import java.io.File;
@@ -47,6 +52,7 @@ public class JavaGenerator {
             properties.load(new FileInputStream(f));
             groupID = properties.getProperty("GROUPID");
             rootInput = properties.getProperty("INPUTPATH");
+            test(null);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -69,62 +75,156 @@ public class JavaGenerator {
         } 
     }
     
-    // New
-    // No orientarlo al grafo
-    public void createClass(String classId, Node classNode, ArrayList<Node> methods) {
+    
+    public void test(String nodeId) {
         
+        Node classNode = new Node();
+        classNode.setName("Pet");
+        /*
         String[] split = {rootInput, "src", "main", "java"};
-        String[] split2 = classNode.getPackageName().split("\\.");
-        
-        split = concatV(split, split2);        
-        String[] split3 = {classNode.getName()};        
+        String[] split2 = classNode.getPackageName().split("\\.");        
+        split = concatV(split, split2);
+        String[] split3 = {classNode.getName()};    
         split = concatV(split, split3);
         
-        String path = String.join(fileSeparator, split);                
+        String path = String.join(fileSeparator, split);*/
+        System.out.println("Iniciando test");
+        String path = "C:\\Users\\prado\\OneDrive\\Documentos\\TG\\spring-petclinic-master\\src\\main\\java\\org\\springframework\\samples\\petclinic\\owner\\Pet.java";
         
         try {
-            CompilationUnit originalCu = StaticJavaParser.parse(new File(path));            
-            CompilationUnit newCu = new CompilationUnit();
+            CompilationUnit originalCu = StaticJavaParser.parse(new File(path));
+            createClass(originalCu, classNode, null, null);
+        } catch (FileNotFoundException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+    
+    // New
+    // No orientarlo al grafo
+    public void createClass(CompilationUnit originalCu, Node classNode, ArrayList<Node> methods, ArrayList<Node> fields) {
+        try {            
+            System.out.println("createClass");
+            CompilationUnit newCu = new CompilationUnit();         
             
             originalCu.getImports().forEach(imp -> newCu.addImport(imp));            
-            newCu.setPackageDeclaration(originalCu.getPackageDeclaration().get());            
+            newCu.setPackageDeclaration(originalCu.getPackageDeclaration().get());
             
             originalCu.findAll(ClassOrInterfaceDeclaration.class).forEach(declaration -> {
-                
-                if(declaration.getClass().getName().equals(classNode.getName())) {
-                    ClassOrInterfaceDeclaration aux = newCu.addClass(declaration.getClass().getName());                    
-                    addMethodsToClass(declaration, aux, classNode, methods);
+                if(declaration.getName().asString().equals(classNode.getName().trim())) {
+                    ClassOrInterfaceDeclaration aux = newCu.addClass(declaration.getName().toString(), getKeywords(declaration.getModifiers()));
+                    addConstructors(declaration, aux);
+                    addComplemets(declaration, aux);
+                    addAnnotations(declaration, aux);
+                    addFieldsToClass(declaration, aux, fields);
+                    addMethodsToClass(declaration, aux, classNode, methods);                    
+                    try {
+                        FileWriter myWriter = new FileWriter("Pet.java");
+                        myWriter.write(newCu.toString());
+                        myWriter.close();
+                    } catch(Exception e) {
+                        System.out.println("createClass: "+ e.getMessage());
+                    }                    
                 }                                                     
             });
             
         } catch (Exception e) {
-            
+            System.out.println(e.getMessage());
         }
     }
     
-    // New    
-    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Node classNode, ArrayList<Node> methods) {
-        
-        originalClass.findAll(MethodDeclaration.class).forEach(n -> {
-            // TODO
+    // TODO: Modificar Constructor para que solo inicialice y reciba los atributos que son indicados en el grafo? -> Caso de generar nosotros constructores
+    // TODO: Filtrar por lista de constructores? -> No generar xD
+    public void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) { 
+        ConstructorDeclaration newConstructor = newClass.addConstructor(getKeywords(originalClass.getModifiers()));
+        originalClass.getConstructors().forEach(constructor -> {
+            newConstructor.setParameters(constructor.getParameters());
+            newConstructor.setBody(constructor.getBody());
+            newConstructor.setAnnotations(constructor.getAnnotations());
+            if(constructor.getComment().isPresent())
+                newConstructor.setComment(constructor.getComment().get());
         });
+    }
+    
+    public void addAnnotations(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
+        newClass.setAnnotations(originalClass.getAnnotations());
+        if(originalClass.getComment().isPresent())
+                newClass.setComment(originalClass.getComment().get());
+    }
+    
+    public void addComplemets(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
+        newClass.setExtendedTypes(originalClass.getExtendedTypes());
+        newClass.setImplementedTypes(originalClass.getImplementedTypes());
+    }
         
-        for (Node method : methods) {
-            
+    public Keyword[] getKeywords(NodeList<Modifier> modifiers) {
+        Keyword[] list = new Keyword[modifiers.size()];
+        int i = 0;
+        for (Modifier modifier : modifiers) {
+            list[i] = modifier.getKeyword();
+            i++;
         }
+        return list;
     }
     
     // New
-    private void addFieldsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Node classNode) {
-        ArrayList<Node> fields = this.graph.getNodeElementsSameMicroserviceBySrcNodeId("Has", classNode.getId(), classNode.getMicroservice());
-        
-        originalClass.findAll(FieldDeclaration.class).forEach(n -> {
-            // TODO
-        });
-        
-        for (Node field : fields) {
+    // TODO1: Filtrar por una lista de metodos
+    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Node classNode, ArrayList<Node> methods) {
+        System.out.println("methods");
+        originalClass.findAll(MethodDeclaration.class).forEach(method -> {
             
-        }
+            System.out.println("MethodDeclaration name: " + method.getDeclarationAsString());
+            if(methodValidate(methods, method)) {
+                MethodDeclaration aux = newClass.addMethod(method.getName().toString(), getKeywords(method.getModifiers()));
+                aux.setType(method.getType());
+                aux.setThrownExceptions(method.getThrownExceptions());
+                method.getParameters().forEach(parameter -> aux.addParameter(parameter));
+                aux.setBody(method.getBody().get());
+                aux.setAnnotations(method.getAnnotations());
+                if(method.getComment().isPresent())
+                    aux.setComment(method.getComment().get());
+            }            
+        });
+    }
+    
+    // New
+    // TODO: Filtrar por una lista de fields
+    private void addFieldsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Node> fieldsNodes) {
+        System.out.println("fields");
+        originalClass.findAll(FieldDeclaration.class).forEach(field -> {
+            // TODO: Fields with Initializer?
+            System.out.println("FieldDeclaration name: " + field.getVariables().get(0).getName());
+            if(fieldsContains(fieldsNodes, field)) {
+                FieldDeclaration aux = newClass.addField(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), getKeywords(field.getModifiers()));
+                aux.setAnnotations(field.getAnnotations());
+                if(field.getComment().isPresent())
+                    aux.setComment(field.getComment().get());
+            }            
+        });
+    }
+    
+    private boolean fieldsContains(ArrayList<Node> fields, FieldDeclaration field) {
+        boolean result = false;
+        /*for(Node f: fields) {
+            if(f.getName().equals(field.getVariables().get(0).getName())) {
+                result = true;
+                break;
+            }
+        }*/
+        return true;
+    }
+    
+    // TODO: Validar cant. Parametros y tipo de cada uno
+    private boolean methodValidate(ArrayList<Node> methods, MethodDeclaration method) {
+        boolean result = false;
+        //ResolvedMethodDeclaration rmd = method.resolve();
+        //System.out.println("Signature: " + rmd.getQualifiedSignature());      
+       /*for(Node m: methods) {
+            if(m.getName().equals(method.getSignature().asString())) {
+                result = true;
+                break;
+            }
+        }*/
+        return true;
     }
     
     private String[] concatV(String[] left, String[] right) {
