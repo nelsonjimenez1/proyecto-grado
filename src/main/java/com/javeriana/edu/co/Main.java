@@ -29,7 +29,7 @@ public class Main {
   public static void main(String[] args) throws Exception {
     
     //cambiar ruta
-    String borrame = "C:\\Users\\nelso\\Documents\\TG\\spring-petclinic-master"; 
+    String borrame = "C:\\Tools\\spring-petclinic-master"; 
    
     if(/*args.length > 0*/ true) {
 

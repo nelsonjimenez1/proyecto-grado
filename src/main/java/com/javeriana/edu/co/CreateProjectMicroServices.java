@@ -7,9 +7,14 @@ package com.javeriana.edu.co;
 
 import com.google.common.io.Files;
 import com.javeriana.edu.co.Utils.XMLUtils;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +39,9 @@ public class CreateProjectMicroServices {
     public String rootGroupID;
     public static String fileSeparator = File.separator;
     public Graph graph;
+    public Integer port; 
 
-    public CreateProjectMicroServices(String microName, Graph graph) { // Modified
+    public CreateProjectMicroServices(String microName, Graph graph, int port) { // Modified
         xmlU = new XMLUtils();
         Properties properties = new Properties();
         try {
@@ -46,6 +52,7 @@ public class CreateProjectMicroServices {
             this.microName = microName;
             this.graph = graph;
             this.generator = new JavaGenerator(rootInput, graph); // Modified
+            this.port= port;
             createBasicFolders();
             createFolderGroupID();
             createFolderAfterGroupID();
@@ -55,6 +62,7 @@ public class CreateProjectMicroServices {
             generateFiles();
             updateRegister();
             copyJavaFiles();
+            createApplicationYML();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -272,5 +280,57 @@ public class CreateProjectMicroServices {
         System.arraycopy(right, 0, result, left.length, right.length);
 
         return result;
+    }
+    private void createApplicationYML(){
+        String[] splitPathDirectory = {"output",microName,"src", "main", "resources","application.yml"};
+        String pathDirectory = String.join(fileSeparator, splitPathDirectory);
+        File newFile=new File(pathDirectory);
+        
+        String[] splitPathDirectoryOldFile = {"templates","application.yml"};
+        String pathDirectoryOldFile = String.join(fileSeparator, splitPathDirectoryOldFile);
+        File oldFile = new File(pathDirectoryOldFile);
+        try {
+            if(oldFile.exists()){
+                BufferedReader FileRead= new BufferedReader(new FileReader(oldFile));
+                String nextLine;
+                while((nextLine=FileRead.readLine())!=null) { 
+                    if (nextLine.toUpperCase().trim().equals("    name: name-service".toUpperCase().trim())) {
+                        writeFile(newFile,"    name: "+ microName);
+                    } else if(nextLine.toUpperCase().trim().equals("server.port: 0000".toUpperCase().trim())){
+                        writeFile(newFile,"server.port: "+ port);
+                    } else{
+                         writeFile(newFile,nextLine);
+                    }             
+                }
+                FileRead.close();
+            }
+        }catch(Exception e)
+        {
+            System.out.println("CreateAplicationYML: " + e.getMessage());
+        }
+    }
+
+    private void writeFile(File file, String line) {
+        try {
+           if(!file.exists()){
+               file.createNewFile();
+           }
+          BufferedWriter fileWriter=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file,true), "utf-8"));
+          fileWriter.write(line + "\r\n");
+          fileWriter.close();
+       } catch (Exception ex) {
+          System.out.println(ex.getMessage());
+       } 
+    }
+    private void deleteFile(File file)
+    {
+         try {
+         if(file.exists()){
+           file.delete(); 
+           System.out.println("File deleted");
+         }
+     } catch (Exception ex) {
+          System.out.println(ex.getMessage());
+     }
     }
 }

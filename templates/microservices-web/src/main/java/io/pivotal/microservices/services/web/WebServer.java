@@ -16,7 +16,6 @@ import io.pivotal.microservices.services.registration.RegistrationServer;
  * Accounts web-server. Works as a microservice client, fetching data from the
  * Account-Service. Uses the Discovery Server (Eureka) to find the microservice.
  * 
- * @author Paul Chapman
  */
 @SpringBootApplication(exclude = { HibernateJpaAutoConfiguration.class, //
         DataSourceAutoConfiguration.class })
@@ -28,9 +27,7 @@ public class WebServer {
      * URL uses the logical name of account-service - upper or lower case, doesn't
      * matter.
      */
-    public static final String OWNER_SERVICE_URL = "http://OWNER-SERVICE";
-
-    public static final String PET_SERVICE_URL = "http://PET-SERVICE";
+    public static final String SERVICE_URL = "";
 
     /**
      * Run the application using Spring Boot and an embedded servlet engine.
@@ -60,8 +57,8 @@ public class WebServer {
     }
 
     @Bean
-    public WebOwnersService ownerService() {
-        return new WebOwnersService(OWNER_SERVICE_URL);
+    public WebService service() {
+        return new WebService(SERVICE_URL);
     }
 
     /**
@@ -70,22 +67,7 @@ public class WebServer {
      * @return
      */
     @Bean
-    public WebOwnerController ownerController() {
-        return new WebOwnerController(ownerService());
-    }
-
-    @Bean
-    public WebPetService petService() {
-        return new WebPetService(PET_SERVICE_URL);
-    }
-
-    /**
-     * Create the controller, passing it the {@link WebAccountsService} to use.
-     * 
-     * @return
-     */
-    @Bean
-    public WebPetController petController() {
-        return new WebPetController(petService());
+    public WebController controller() {
+        return new WebController(service());
     }
 }

@@ -16,19 +16,25 @@ public class Controller {
     private Graph graph;
     private CreateProjectMicroRegister createProjectMicroRegister;
     private HashMap<String, CreateProjectMicroServices> hashMapMicroservice;
+    private HashMap<String, Integer> hashMapPortMicroservice;
 
     public Controller() {
         this.graph = new Graph();
         this.createProjectMicroRegister = new CreateProjectMicroRegister();
         this.hashMapMicroservice = new HashMap<>();
         this.travelArrayMicroservice();
+        this.hashMapPortMicroservice = new HashMap<>(); 
+        CreateProjectMicroWeb newMicroWeb = new CreateProjectMicroWeb(this.graph);
     }
     
     public void travelArrayMicroservice() {
         ArrayList <String> list = graph.getListMicroservices();
+        int portGeneric = 3333;
         
-        for (String string : list) {
-            hashMapMicroservice.put(string, new CreateProjectMicroServices(string, graph));
+        for (String microName : list) {
+            //hashMapPortMicroservice.put(microName, portGeneric);
+            hashMapMicroservice.put(microName, new CreateProjectMicroServices(microName, graph,portGeneric));
+            portGeneric++;
         }
     }
 }

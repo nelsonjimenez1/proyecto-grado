@@ -52,7 +52,7 @@ public class JavaGenerator {
             properties.load(new FileInputStream(f));
             groupID = properties.getProperty("GROUPID");
             rootInput = properties.getProperty("INPUTPATH");
-            test(null);
+            //test(null);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -100,7 +100,7 @@ public class JavaGenerator {
     }
     
     // New
-    // No orientarlo al grafo
+    // No orientarlo al grafo 
     public void createClass(CompilationUnit originalCu, Vertex classNode, ArrayList<Vertex> methods, ArrayList<Vertex> fields) {
         try {            
             System.out.println("createClass");
@@ -245,4 +245,5 @@ public class JavaGenerator {
             collector.add(md.getNameAsString());
         }
     }
+    
 }

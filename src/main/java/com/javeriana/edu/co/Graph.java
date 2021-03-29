@@ -181,7 +181,8 @@ public class Graph {
     public ArrayList<Vertex> getNodeMethodsBySrcNodeId(String nodeId) {
         ArrayList<Vertex> methods = new ArrayList<>();
         for (Edge edge : getEdgesBySrcNodeId(nodeId)) {
-            if(edge.getTypeRelation().equals("Calls")) {
+            if(edge.getTypeRelation().equals("Has") && 
+                    this.nodes.get(edge.getIdDest()).getType().equalsIgnoreCase("Method")) {
                 methods.add(this.nodes.get(edge.getIdDest()));
             }
         }
@@ -236,5 +237,18 @@ public class Graph {
             }
         }
         return listMicroservices;   
+    }
+    
+    public HashMap<String, ArrayList<Vertex>> getControllers(){
+        HashMap<String, ArrayList<Vertex>> controllers = new HashMap();
+        for (String microName : getListMicroservices()) {
+            controllers.put(microName, new ArrayList<>());
+        }
+        for (Vertex node : nodes.values()) {
+            if(node.getSubType().equalsIgnoreCase("Controller")){
+                controllers.get(node.getMicroservice()).add(node); 
+            }
+        }
+        return controllers;
     }
 }
