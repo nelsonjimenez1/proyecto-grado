@@ -9,7 +9,7 @@ package com.javeriana.edu.co;
  *
  * @author PC
  */
-public class Node {
+public class Vertex {
     private String packageName;
     private String name;
     private String type;
@@ -32,7 +32,7 @@ public class Node {
         this.microservice = microservice;
     }*/
     
-    public Node() {
+    public Vertex() {
         
     }
 

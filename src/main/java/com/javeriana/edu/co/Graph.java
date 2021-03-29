@@ -5,7 +5,7 @@
  */
 package com.javeriana.edu.co;
 
-import static com.javeriana.edu.co.CreateProyectMicroServices.fileSeparator;
+import static com.javeriana.edu.co.CreateProjectMicroServices.fileSeparator;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,19 +26,19 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class Graph {
 
-    private HashMap<String, Node> nodes;
+    private HashMap<String, Vertex> nodes;
     private HashMap<String, ArrayList<Edge>> edges;
 
     public Graph() { // Modified
         this.nodes = new HashMap<>();
         this.edges = new HashMap<>();
-        //loadNodes();
-        //loadConnections();
+        loadNodes();
+        loadConnections();
 
     }
     
     public void loadNodes() {
-        String[] split = {System.getProperty("user.dir"), "input", "graph.xsl"};
+        String[] split = {System.getProperty("user.dir"), "input", "graph.xlsx"};
         String filename = String.join(fileSeparator, split);
         
         try {
@@ -46,7 +46,7 @@ public class Graph {
             XSSFWorkbook workBook = new XSSFWorkbook(fis);
             XSSFSheet hssfsheetNodes = workBook.getSheetAt(0);
             Iterator rowIterator = hssfsheetNodes.rowIterator();    
-            int row = 0;
+            int row = 1;
             
             while(rowIterator.hasNext()) {
                 
@@ -58,7 +58,7 @@ public class Graph {
                 }
                 
                 Iterator it = hssfRow.cellIterator();           
-                Node node = new Node();
+                Vertex node = new Vertex();
 
                 int cell = 0;
                 
@@ -98,7 +98,7 @@ public class Graph {
     }
     
     public void loadConnections() {
-        String[] split = {System.getProperty("user.dir"), "input", "graph.xsl"};
+        String[] split = {System.getProperty("user.dir"), "input", "graph.xlsx"};
         String filename = String.join(fileSeparator, split);
         
         try {
@@ -106,7 +106,7 @@ public class Graph {
             XSSFWorkbook workBook = new XSSFWorkbook(fis);
             XSSFSheet hssfsheetNodes = workBook.getSheetAt(1);
             Iterator rowIterator = hssfsheetNodes.rowIterator();    
-            int row = 0;
+            int row = 1;
             
             while(rowIterator.hasNext()) {
                 
@@ -151,12 +151,12 @@ public class Graph {
     }
 
     // New
-    public ArrayList<Node> getAllNodes() {
-        return (ArrayList<Node>) this.nodes.values();
+    public ArrayList<Vertex> getAllNodes() {
+        return new ArrayList<Vertex> (this.nodes.values());
     }   
     
     // New
-    public Node getNodeByNodeId(String nodeId) {
+    public Vertex getNodeByNodeId(String nodeId) {
         return this.nodes.get(nodeId);
     }
     
@@ -178,8 +178,8 @@ public class Graph {
     }
     
     // New
-    public ArrayList<Node> getNodeMethodsBySrcNodeId(String nodeId) {
-        ArrayList<Node> methods = new ArrayList<>();
+    public ArrayList<Vertex> getNodeMethodsBySrcNodeId(String nodeId) {
+        ArrayList<Vertex> methods = new ArrayList<>();
         for (Edge edge : getEdgesBySrcNodeId(nodeId)) {
             if(edge.getTypeRelation().equals("Calls")) {
                 methods.add(this.nodes.get(edge.getIdDest()));
@@ -189,8 +189,8 @@ public class Graph {
     }   
     
     // New
-    public ArrayList<Node> getNodeElementsSameMicroserviceBySrcNodeId(String type, String nodeId, String microservice) {
-        ArrayList<Node> methods = new ArrayList<>();
+    public ArrayList<Vertex> getNodeElementsSameMicroserviceBySrcNodeId(String type, String nodeId, String microservice) {
+        ArrayList<Vertex> methods = new ArrayList<>();
         for (Edge edge : getEdgesSameMicroserviceBySrcNodeId(nodeId, microservice)) {
             if(edge.getTypeRelation().equals(type)) {
                 methods.add(this.nodes.get(edge.getIdDest()));
@@ -200,11 +200,11 @@ public class Graph {
     }
     
     // New
-    public ArrayList<Node> getNodesByMicroservice(String microservice) {
-        ArrayList<Node> result = new ArrayList<>();
+    public ArrayList<Vertex> getNodesByMicroservice(String microservice) {
+        ArrayList<Vertex> result = new ArrayList<>();
         
-        Collection<Node> nodesAux = this.getAllNodes();
-        for (Node node : nodesAux) {
+        Collection<Vertex> nodesAux = this.getAllNodes();
+        for (Vertex node : nodesAux) {
             if(node.getMicroservice().equals(microservice))
                 result.add(node);
         }
@@ -228,5 +228,13 @@ public class Graph {
         return result;
     }
     
-       
+    public ArrayList<String> getListMicroservices() {
+        ArrayList<String> listMicroservices = new ArrayList<>();
+        for (Vertex node : this.getAllNodes()) {
+            if (!listMicroservices.contains(node.getMicroservice())){
+                listMicroservices.add(node.getMicroservice());
+            }
+        }
+        return listMicroservices;   
+    }
 }

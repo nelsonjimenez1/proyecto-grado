@@ -5,7 +5,7 @@
  */
 package com.javeriana.edu.co;
 
-import static com.javeriana.edu.co.CreateProyectMicroServices.fileSeparator;
+import static com.javeriana.edu.co.CreateProjectMicroServices.fileSeparator;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,9 +18,9 @@ import org.apache.commons.io.FileUtils;
  *
  * @author Gustavo Rivera
  */
-public class CreateProyectMicroRegister {
+public class CreateProjectMicroRegister {
     
-    CreateProyectMicroRegister()
+    CreateProjectMicroRegister()
     {   
         copyFolder();  
     }
@@ -54,7 +54,7 @@ public class CreateProyectMicroRegister {
         try {
             FileUtils.copyDirectoryToDirectory(from, to);
         } catch (IOException ex) {
-            Logger.getLogger(CreateProyectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

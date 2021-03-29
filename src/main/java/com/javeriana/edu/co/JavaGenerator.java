@@ -58,7 +58,7 @@ public class JavaGenerator {
         }
     }
 
-    public void updateRegiter(String nameMicroService, String rooteGroupID) {
+    public void updateRegister(String nameMicroService, String rooteGroupID) {
         try {
             String[] splitRegistrationServer = {"templates","RegistrationServer.java"};
             String[] splitRegistrationServerWrite = {"output",nameMicroService,"src","main","java",rooteGroupID,"services","register","RegistrationServer.java"};
@@ -78,7 +78,7 @@ public class JavaGenerator {
     
     public void test(String nodeId) {
         
-        Node classNode = new Node();
+        Vertex classNode = new Vertex();
         classNode.setName("Pet");
         /*
         String[] split = {rootInput, "src", "main", "java"};
@@ -89,7 +89,7 @@ public class JavaGenerator {
         
         String path = String.join(fileSeparator, split);*/
         System.out.println("Iniciando test");
-        String path = "C:\\Users\\prado\\OneDrive\\Documentos\\TG\\spring-petclinic-master\\src\\main\\java\\org\\springframework\\samples\\petclinic\\owner\\Pet.java";
+        String path = "C:\\Users\\nelso\\Documents\\TG\\spring-petclinic-master\\src\\main\\java\\org\\springframework\\samples\\petclinic\\owner\\Pet.java";
         
         try {
             CompilationUnit originalCu = StaticJavaParser.parse(new File(path));
@@ -101,7 +101,7 @@ public class JavaGenerator {
     
     // New
     // No orientarlo al grafo
-    public void createClass(CompilationUnit originalCu, Node classNode, ArrayList<Node> methods, ArrayList<Node> fields) {
+    public void createClass(CompilationUnit originalCu, Vertex classNode, ArrayList<Vertex> methods, ArrayList<Vertex> fields) {
         try {            
             System.out.println("createClass");
             CompilationUnit newCu = new CompilationUnit();         
@@ -168,7 +168,7 @@ public class JavaGenerator {
     
     // New
     // TODO1: Filtrar por una lista de metodos
-    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Node classNode, ArrayList<Node> methods) {
+    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Vertex classNode, ArrayList<Vertex> methods) {
         System.out.println("methods");
         originalClass.findAll(MethodDeclaration.class).forEach(method -> {
             
@@ -188,7 +188,7 @@ public class JavaGenerator {
     
     // New
     // TODO: Filtrar por una lista de fields
-    private void addFieldsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Node> fieldsNodes) {
+    private void addFieldsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> fieldsNodes) {
         System.out.println("fields");
         originalClass.findAll(FieldDeclaration.class).forEach(field -> {
             // TODO: Fields with Initializer?
@@ -202,7 +202,7 @@ public class JavaGenerator {
         });
     }
     
-    private boolean fieldsContains(ArrayList<Node> fields, FieldDeclaration field) {
+    private boolean fieldsContains(ArrayList<Vertex> fields, FieldDeclaration field) {
         boolean result = false;
         /*for(Node f: fields) {
             if(f.getName().equals(field.getVariables().get(0).getName())) {
@@ -214,7 +214,7 @@ public class JavaGenerator {
     }
     
     // TODO: Validar cant. Parametros y tipo de cada uno
-    private boolean methodValidate(ArrayList<Node> methods, MethodDeclaration method) {
+    private boolean methodValidate(ArrayList<Vertex> methods, MethodDeclaration method) {
         boolean result = false;
         //ResolvedMethodDeclaration rmd = method.resolve();
         //System.out.println("Signature: " + rmd.getQualifiedSignature());      

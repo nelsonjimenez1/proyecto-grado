@@ -27,10 +27,9 @@ public class Main {
  
   
   public static void main(String[] args) throws Exception {
-    Graph graph = new Graph();
+    
     //cambiar ruta
-    //String borrame = "C:\\Users\\PC\\Desktop\\spring-petclinic-master";
-    String borrame = "C:\\Users\\prado\\OneDrive\\Documentos\\TG\\spring-petclinic-master"; // Sebastián
+    String borrame = "C:\\Users\\nelso\\Documents\\TG\\spring-petclinic-master"; 
    
     if(/*args.length > 0*/ true) {
 
@@ -47,9 +46,7 @@ public class Main {
         }
     }
     
-    CreateProyectMicroServices c = new CreateProyectMicroServices("MicroPet", graph); // Modified
-    CreateProyectMicroRegister r = new CreateProyectMicroRegister(); 
-    
+    Controller c = new Controller();
     System.out.println("ToyFuncionando guiño guiño");    
   }
 
