@@ -30,7 +30,7 @@ public class WebService {
 
     protected String serviceUrl;
 
-    protected Logger logger = Logger.getLogger(WebService.class.getName());
+    //protected Logger logger = Logger.getLogger(WebService.class.getName());
 
     public WebService(String serviceUrl) {
         this.serviceUrl = serviceUrl.startsWith("http") ? serviceUrl : "http://" + serviceUrl;
