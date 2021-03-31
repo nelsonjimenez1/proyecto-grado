@@ -34,8 +34,6 @@ public class WebController {
     @Autowired
     protected WebService service;
 
-    protected Logger logger = Logger.getLogger(WebController.class.getName());
-
     public WebController(WebService service) {
         this.service = service;
     }
