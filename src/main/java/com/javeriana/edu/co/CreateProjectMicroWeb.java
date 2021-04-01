@@ -9,6 +9,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -447,10 +448,10 @@ public class CreateProjectMicroWeb {
             Properties properties = new Properties();
             HashMap<String, Vertex> entities = graph.getEntitiesProjectWeb();
             File f = new File(System.getProperty("user.dir"), "configuracion.properties");
-            properties.load(new FileInputStream(f));
-            String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
-            String pathGeneric = String.join(fileSeparator, split) + fileSeparator;
-            for (String name : entities.keySet()) {
+            properties.load(new FileInputStream(f));            
+            String groupIdWeb = "io.pivotal.microservices.services.web";
+            for (String name : entities.keySet()) {                                
+                String originalGroupId = properties.getProperty("GROUPID");
                 String groupID = entities.get(name).getPackageName();
                 String[] split2 = groupID.split("\\.");
                 String root = "";
@@ -460,7 +461,17 @@ public class CreateProjectMicroWeb {
                 String[] rootInput = {properties.getProperty("INPUTPATH"), "src", "main", "java", root, name + ".java"};
                 String path = String.join(fileSeparator, rootInput);
                 CompilationUnit cuEntity = StaticJavaParser.parse(new File(path));
-                cuEntity.setPackageDeclaration(groupID); 
+                cuEntity.setPackageDeclaration(groupIdWeb); 
+                NodeList<Node> importsRemove = new NodeList<>();
+                cuEntity.getImports().forEach(imp -> {
+                    if(imp.getNameAsString().contains(originalGroupId))
+                        importsRemove.add(imp);
+                });
+                importsRemove.forEach(imp -> {
+                    cuEntity.remove(imp);
+                });
+                String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web", name+".java"};
+                String pathGeneric = String.join(fileSeparator, split) + fileSeparator;
                 saveMicroservice(cuEntity, pathGeneric);
             }
         } catch (FileNotFoundException ex) {
