@@ -261,7 +261,7 @@ public class Graph {
         for (Vertex node : nodes.values()) {
             if (node.getSubType().equalsIgnoreCase("Controller")) {
                 for (Edge edge : this.edges.get(node.getId())) {
-                    if (edge.getTypeRelation().equalsIgnoreCase("usesClass")) {
+                    if (edge.getTypeRelation().equalsIgnoreCase("Uses Class")) {
                         entities.put(this.nodes.get(edge.getIdDest()).getName(), this.nodes.get(edge.getIdDest()));
                     }
                 }
