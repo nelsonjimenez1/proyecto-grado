@@ -29,9 +29,10 @@ public class Main {
   public static void main(String[] args) throws Exception {
     
     //cambiar ruta
+    //String borrame = "C:\\Users\\nelso\\Documents\\TG\\spring-petclinic-master"; //Nelson
+    String borrame = "C:\\\\Users\\\\PC\\\\Desktop\\\\spring-petclinic-master"; //Santos
     //String borrame = "C:\\Tools\\spring-petclinic-master"; //Gustavo
     //String borrame = "C:\\Users\\prado\\OneDrive\\Documentos\\TG\\spring-petclinic-master"; //Sebastián
-    String borrame = "C:\\Users\\nelso\\Documents\\TG\\spring-petclinic-master"; //Nelson
 
     if(/*args.length > 0*/ true) {
 

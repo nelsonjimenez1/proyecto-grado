@@ -27,12 +27,14 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.TypeParameter;
 import static com.javeriana.edu.co.CreateProjectMicroServices.fileSeparator;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.internal.ir.BlockStatement;
@@ -54,6 +56,7 @@ public class CreateProjectMicroWeb {
         copyFolder();
         generateServices();
         generateControllers();
+        moveEntities();
     }
 
     private void copyFolder() {
@@ -380,7 +383,7 @@ public class CreateProjectMicroWeb {
                             pair.setValue(StaticJavaParser.parseExpression("\"" + urlController + pair.getValue().toString().substring(1, pair.getValue().toString().length())));
                         }
                     }
-                    
+
                     methodWebController.addAnnotation(annotationNormal);
                 } else if (annotation instanceof SingleMemberAnnotationExpr) {
                     SingleMemberAnnotationExpr annotationSingle = (SingleMemberAnnotationExpr) annotation;
@@ -388,8 +391,7 @@ public class CreateProjectMicroWeb {
                     annotationSingle.setMemberValue(StaticJavaParser.parseExpression("\"" + urlController + annotationSingle.getMemberValue().toString().substring(1, annotationSingle.getMemberValue().toString().length())));
                     methodWebController.addAnnotation(annotationSingle);
                 }
-            }
-            else {
+            } else {
                 methodWebController.addAnnotation(annotation);
             }
         });
@@ -428,4 +430,60 @@ public class CreateProjectMicroWeb {
         }
         return string;
     }
+
+   /* private void copyFile(String origin, String destiny) {
+        File from = new File(origin);
+        File to = new File(destiny);
+
+        try {
+            FileUtils.copyFileToDirectory(from, to);
+        } catch (IOException ex) {
+            Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }*/
+
+    private void moveEntities() {
+        try {
+            Properties properties = new Properties();
+            HashMap<String, Vertex> entities = graph.getEntitiesProjectWeb();
+            File f = new File(System.getProperty("user.dir"), "configuracion.properties");
+            properties.load(new FileInputStream(f));
+            String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
+            String pathGeneric = String.join(fileSeparator, split) + fileSeparator;
+            for (String name : entities.keySet()) {
+                String groupID = entities.get(name).getPackageName();
+                String[] split2 = groupID.split("\\.");
+                String root = "";
+                for (String s : split2) {
+                    root += fileSeparator + s;
+                }
+                String[] rootInput = {properties.getProperty("INPUTPATH"), "src", "main", "java", root, name + ".java"};
+                String path = String.join(fileSeparator, rootInput);
+                CompilationUnit cuEntity = StaticJavaParser.parse(new File(path));
+                cuEntity.setPackageDeclaration(groupID); 
+                saveMicroservice(cuEntity, pathGeneric);
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(CreateProjectMicroWeb.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(CreateProjectMicroWeb.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+   /* private void copyJavaFiles() {
+        ArrayList<Vertex> list = graph.getNodesByMicroservice(microName);
+        for (Vertex vertex : list) {
+            if (vertex.getType().equals("Class")) {
+                String[] origin = {this.rootInput, "src", "main", "java"};
+                String[] originRight = vertex.getPackageName().split("\\.");
+                origin = concatV(origin, originRight);
+                String originPath = String.join(fileSeparator, origin) + fileSeparator + vertex.getName() + ".java";
+                String[] destiny = {"output", this.microName, "src", "main", "java"};
+                String[] destinyRight = vertex.getPackageName().split("\\.");
+                destiny = concatV(destiny, destinyRight);
+                String destinyPath = String.join(fileSeparator, destiny);
+                copyFile(originPath, destinyPath);
+            }
+        }
+    }*/
 }
