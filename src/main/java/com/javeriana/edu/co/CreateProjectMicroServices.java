@@ -5,12 +5,15 @@
  */
 package com.javeriana.edu.co;
 
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.io.Files;
 import com.javeriana.edu.co.Utils.XMLUtils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -258,18 +261,29 @@ public class CreateProjectMicroServices {
     //Validar caso 3
     private void copyJavaFiles() {
         ArrayList<Vertex> list = graph.getNodesByMicroservice(microName);
-        for (Vertex vertex : list) {
-           if (vertex.getType().equals("Class")) {
-            String[] origin = {this.rootInput,"src", "main", "java"};
-            String[] originRight = vertex.getPackageName().split("\\.");
-            origin = concatV(origin, originRight);
-            String originPath = String.join(fileSeparator, origin) + fileSeparator + vertex.getName() + ".java";
-            String[] destiny = {"output",this.microName, "src", "main", "java"};
-            String[] destinyRight = vertex.getPackageName().split("\\.");
-            destiny = concatV(destiny, destinyRight);
-            String destinyPath = String.join(fileSeparator, destiny);
-            copyFile(originPath, destinyPath);
-           }  
+        for (Vertex vertex : list){ 
+            if (vertex.getType().equals("Class")) {
+                String[] origin = {this.rootInput,"src", "main", "java"};
+                String[] originRight = vertex.getPackageName().split("\\.");
+                origin = concatV(origin, originRight);
+                String originPath = String.join(fileSeparator, origin) + fileSeparator + vertex.getName() + ".java";
+                String[] destiny = {"output",this.microName, "src", "main", "java"};
+                String[] destinyRight = vertex.getPackageName().split("\\.");
+                destiny = concatV(destiny, destinyRight);
+                String destinyPath = String.join(fileSeparator, destiny);               
+                
+                if( vertex.getSubType().equalsIgnoreCase("Controller") || vertex.getSubType().equalsIgnoreCase("Service")){
+                    try {
+                        CompilationUnit newCuWebService = StaticJavaParser.parse(new File(originPath));
+                        ArrayList<Vertex> methods = graph.getMethodsByClassId(vertex.getId()); 
+                        this.generator.createClass(newCuWebService, vertex, methods, destinyPath + fileSeparator + vertex.getName()+".java");
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }else {
+                    copyFile(originPath, destinyPath);
+                }
+           }
         }
     }
     
@@ -332,5 +346,8 @@ public class CreateProjectMicroServices {
      } catch (Exception ex) {
           System.out.println(ex.getMessage());
      }
+    }
+    private void createClass(){
+        
     }
 }

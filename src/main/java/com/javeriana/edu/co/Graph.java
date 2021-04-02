@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -269,4 +270,25 @@ public class Graph {
         }
         return entities;
     }
+    public ArrayList<Vertex> getMethodsByClassId(String classId)
+    {   
+        ArrayList<Vertex> methodByClass = new ArrayList<>();
+        if(getNodeByNodeId(classId).getType().equalsIgnoreCase("Class")){
+        
+            ArrayList<Edge> edges = getEdgesBySrcNodeId(classId); 
+            Vertex aux;
+            for (Edge edge : edges) {
+                if(edge.getTypeRelation().equalsIgnoreCase("Has method")){
+                    aux = getNodeByNodeId(edge.getIdDest());
+                    if(aux.getType().equalsIgnoreCase("Method")){
+                        methodByClass.add(aux);
+                    }
+                }            
+            }
+        }
+        return methodByClass; 
+    }
+//     public List<Vertex> getFieldsByClassId(String classId)
+//    {
+//    }
 }

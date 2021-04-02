@@ -93,7 +93,7 @@ public class JavaGenerator {
         
         try {
             CompilationUnit originalCu = StaticJavaParser.parse(new File(path));
-            createClass(originalCu, classNode, null, null);
+            //createClass(originalCu, classNode, null, null);
         } catch (FileNotFoundException ex) {
             System.out.println(ex.getMessage());
         }
@@ -119,6 +119,38 @@ public class JavaGenerator {
                     addMethodsToClass(declaration, aux, classNode, methods);                    
                     try {
                         FileWriter myWriter = new FileWriter("Pet.java");
+                        myWriter.write(newCu.toString());
+                        myWriter.close();
+                    } catch(Exception e) {
+                        System.out.println("createClass: "+ e.getMessage());
+                    }                    
+                }                                                     
+            });
+            
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    public void createClass(CompilationUnit originalCu, Vertex classNode, ArrayList<Vertex> methods, String rootDest) {
+        try {            
+            System.out.println("createClass");
+            CompilationUnit newCu = new CompilationUnit();         
+            
+            originalCu.getImports().forEach(imp -> newCu.addImport(imp));            
+            newCu.setPackageDeclaration(originalCu.getPackageDeclaration().get());
+            
+            originalCu.findAll(ClassOrInterfaceDeclaration.class).forEach(declaration -> {
+                if(declaration.getName().asString().equals(classNode.getName().trim())) {
+                    ClassOrInterfaceDeclaration aux = newCu.addClass(declaration.getName().toString(), getKeywords(declaration.getModifiers()));
+                    addConstructors(declaration, aux);
+                    addComplemets(declaration, aux);
+                    addAnnotations(declaration, aux);
+                    addFieldsToClass(declaration, aux);
+                    addMethodsToClass(declaration, aux, classNode, methods); 
+                    System.out.println("Ruta " + rootDest);
+                    try {
+                        FileWriter myWriter = new FileWriter(rootDest);
                         myWriter.write(newCu.toString());
                         myWriter.close();
                     } catch(Exception e) {
@@ -174,6 +206,7 @@ public class JavaGenerator {
             
             System.out.println("MethodDeclaration name: " + method.getDeclarationAsString());
             if(methodValidate(methods, method)) {
+                //TODO: VALIDAR si metodo hace llamada a otro metodo fuera del microservicio
                 MethodDeclaration aux = newClass.addMethod(method.getName().toString(), getKeywords(method.getModifiers()));
                 aux.setType(method.getType());
                 aux.setThrownExceptions(method.getThrownExceptions());
@@ -202,6 +235,17 @@ public class JavaGenerator {
         });
     }
     
+    private void addFieldsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
+        System.out.println("fields");
+        originalClass.findAll(FieldDeclaration.class).forEach(field -> {
+            // TODO: Fields with Initializer?
+            FieldDeclaration aux = newClass.addField(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), getKeywords(field.getModifiers()));
+            aux.setAnnotations(field.getAnnotations());
+
+            if(field.getComment().isPresent())
+                aux.setComment(field.getComment().get());                  
+        });
+    }
     private boolean fieldsContains(ArrayList<Vertex> fields, FieldDeclaration field) {
         boolean result = false;
         /*for(Node f: fields) {
@@ -215,16 +259,53 @@ public class JavaGenerator {
     
     // TODO: Validar cant. Parametros y tipo de cada uno
     private boolean methodValidate(ArrayList<Vertex> methods, MethodDeclaration method) {
-        boolean result = false;
         //ResolvedMethodDeclaration rmd = method.resolve();
-        //System.out.println("Signature: " + rmd.getQualifiedSignature());      
-       /*for(Node m: methods) {
-            if(m.getName().equals(method.getSignature().asString())) {
-                result = true;
-                break;
+        //System.out.println("Signature: " + rmd.getQualifiedSignature());  
+        String[] splitSignature ;
+        String[] splitVertex;
+        String[] parameterSignature;
+        String[] parameterVertex;
+        String nameVertex;
+        splitSignature = method.getSignature().asString().split("\\(|\\)");
+        if(splitSignature.length > 1){
+            parameterSignature = splitSignature[1].split(",");
+            System.out.println("Split Signature "+ parameterSignature[0]);
+        }else{
+            parameterSignature = null; 
+        }            
+        ArrayList<Boolean> flags = new ArrayList<>(); 
+        for(Vertex m: methods) {
+            splitVertex = m.getName().split("\\(|\\)"); 
+            nameVertex = splitVertex[0].split("\\.")[1];
+            if(splitVertex.length >1 )
+                parameterVertex = splitVertex[1].split(",");
+            else
+                parameterVertex = null;
+            boolean result = true;
+            if(nameVertex.equals(splitSignature[0])){
+                if(parameterSignature != null && parameterVertex!= null){
+                    if(parameterVertex.length == parameterSignature.length){
+                        for (int i = 0; i < parameterVertex.length; i++) {
+                            String[] splitAux = parameterVertex[i].split("\\.");
+                            String parameterType = splitAux[splitAux.length-1].trim();
+                            if(!parameterType.equals(parameterSignature[i].trim())){
+                                result = false; 
+                                break; 
+                            } 
+                        }
+                    }
+                } else{
+                    if((parameterVertex != null && parameterSignature == null) ||(parameterVertex == null && parameterSignature != null) ){
+                        result = false;
+                    }
+                }
+            } else{
+                result = false;
             }
-        }*/
-        return true;
+            flags.add(result);  
+         }
+        System.out.println("RETORNO: " +flags.contains(true));
+        return flags.contains(true);
     }
     
     private String[] concatV(String[] left, String[] right) {
