@@ -259,8 +259,6 @@ public class JavaGenerator {
     
     // TODO: Validar cant. Parametros y tipo de cada uno
     private boolean methodValidate(ArrayList<Vertex> methods, MethodDeclaration method) {
-        //ResolvedMethodDeclaration rmd = method.resolve();
-        //System.out.println("Signature: " + rmd.getQualifiedSignature());  
         String[] splitSignature ;
         String[] splitVertex;
         String[] parameterSignature;
@@ -269,7 +267,6 @@ public class JavaGenerator {
         splitSignature = method.getSignature().asString().split("\\(|\\)");
         if(splitSignature.length > 1){
             parameterSignature = splitSignature[1].split(",");
-            System.out.println("Split Signature "+ parameterSignature[0]);
         }else{
             parameterSignature = null; 
         }            
@@ -304,7 +301,6 @@ public class JavaGenerator {
             }
             flags.add(result);  
          }
-        System.out.println("RETORNO: " +flags.contains(true));
         return flags.contains(true);
     }
     
