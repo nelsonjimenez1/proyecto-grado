@@ -42,20 +42,20 @@ public class CreateProjectMicroServices {
     public String rootGroupID;
     public static String fileSeparator = File.separator;
     public Graph graph;
-    public Integer port; 
+    public Integer port;
 
     public CreateProjectMicroServices(String microName, Graph graph, int port) { // Modified
         xmlU = new XMLUtils();
         Properties properties = new Properties();
         try {
-            File f = new File(System.getProperty("user.dir"),"configuracion.properties");
+            File f = new File(System.getProperty("user.dir"), "configuracion.properties");
             properties.load(new FileInputStream(f));
             groupID = properties.getProperty("GROUPID");
             rootInput = properties.getProperty("INPUTPATH");
             this.microName = microName;
             this.graph = graph;
             this.generator = new JavaGenerator(rootInput, graph); // Modified
-            this.port= port;
+            this.port = port;
             createBasicFolders();
             createFolderGroupID();
             createFolderAfterGroupID();
@@ -80,14 +80,14 @@ public class CreateProjectMicroServices {
         dirOutput.mkdir();
 
         for (String c : folders) {
-            
-            rout +=  fileSeparator+ c;
-            File directory = new File(System.getProperty("user.dir"), "output" +rout);
+
+            rout += fileSeparator + c;
+            File directory = new File(System.getProperty("user.dir"), "output" + rout);
             directory.mkdir();
         }
 
         for (String sc : subFolders) {
-            File directory = new File(System.getProperty("user.dir") , "output" + rout  + fileSeparator+ sc);
+            File directory = new File(System.getProperty("user.dir"), "output" + rout + fileSeparator + sc);
             directory.mkdir();
         }
     }
@@ -97,40 +97,40 @@ public class CreateProjectMicroServices {
         String[] split = groupID.split("\\.");
         String root = "";
         //String path = String.join(fileSeparator, split);
-        
-        String[] splitPath = {System.getProperty("user.dir"),"output" ,this.microName,"src","main","java"};
+
+        String[] splitPath = {System.getProperty("user.dir"), "output", this.microName, "src", "main", "java"};
         String path = String.join(fileSeparator, splitPath);
         for (String s : split) {
             root += fileSeparator + s;
-            File directory = new File(path+ root);
+            File directory = new File(path + root);
             directory.mkdir();
         }
-        
+
         this.rootGroupID = root;
-        String[] splitPathDirectory = {System.getProperty("user.dir"),"output" ,this.microName,"src","main","java",root,"services"};
+        String[] splitPathDirectory = {System.getProperty("user.dir"), "output", this.microName, "src", "main", "java", root, "services"};
         String pathDirectory = String.join(fileSeparator, splitPathDirectory);
         File directory = new File(pathDirectory);
         directory.mkdir();
-        directory = new File(pathDirectory+ fileSeparator+ "register");
+        directory = new File(pathDirectory + fileSeparator + "register");
         directory.mkdir();
     }
 
     public void createPOM() {
-        String[] splitPath = {System.getProperty("user.dir"), "templates" ,"pom.xml"};
+        String[] splitPath = {System.getProperty("user.dir"), "templates", "pom.xml"};
         String path = String.join(fileSeparator, splitPath);
         Document dOutput = xmlU.openXMLFile(path);
 
         addDependencies(dOutput);
         addPlugins(dOutput);
         updateGroupId_ArtifactID(dOutput);
-        
-        String[] splitPathXml = {System.getProperty("user.dir"),"output" ,microName,"pom.xml"};
+
+        String[] splitPathXml = {System.getProperty("user.dir"), "output", microName, "pom.xml"};
         String pathXml = String.join(fileSeparator, splitPathXml);
         xmlU.saveXML(dOutput, pathXml);
     }
 
     public void addDependencies(Document dOutput) {
-        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator+ "pom.xml");
+        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator + "pom.xml");
         ArrayList<Node> nodos = xmlU.readXMLNodes(dInput, "/project/dependencies/dependency");
 
         for (Node nodo : nodos) {
@@ -139,7 +139,7 @@ public class CreateProjectMicroServices {
     }
 
     public void addPlugins(Document dOutput) {
-        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator+ "pom.xml");
+        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator + "pom.xml");
         ArrayList<Node> nodos = xmlU.readXMLNodes(dInput, "/project/plugins/plugin");
 
         for (Node nodo : nodos) {
@@ -148,7 +148,7 @@ public class CreateProjectMicroServices {
     }
 
     private void updateGroupId_ArtifactID(Document dOutput) {
-        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator+ "pom.xml");
+        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator + "pom.xml");
         ArrayList<Node> nodoGroupId = xmlU.readXMLNodes(dInput, "/project/groupId");
         ArrayList<Node> nodoArtifactID = xmlU.readXMLNodes(dInput, "/project/artifactId");
         xmlU.removeNodes(dOutput, "/project/groupId");
@@ -159,9 +159,9 @@ public class CreateProjectMicroServices {
     }
 
     private void createResources() {
-        String[] splitOne = {rootInput,"src","main","resources"};
+        String[] splitOne = {rootInput, "src", "main", "resources"};
         String pathOne = String.join(fileSeparator, splitOne);
-        String[] splitTwo = {System.getProperty("user.dir"),"output", microName,"src","main"};
+        String[] splitTwo = {System.getProperty("user.dir"), "output", microName, "src", "main"};
         String pathTwo = String.join(fileSeparator, splitTwo);
         copyAnotherDirectory(pathOne, pathTwo);
     }
@@ -176,7 +176,7 @@ public class CreateProjectMicroServices {
             Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void copyFile(String origin, String destiny) {
         File from = new File(origin);
         File to = new File(destiny);
@@ -189,14 +189,14 @@ public class CreateProjectMicroServices {
     }
 
     private void copyAuxiliaryFolders() {
-        ArrayList<File> list = listDirectory(rootInput +fileSeparator+"src"+fileSeparator+"main");
-        String[] split = {rootInput,"src","main"};
+        ArrayList<File> list = listDirectory(rootInput + fileSeparator + "src" + fileSeparator + "main");
+        String[] split = {rootInput, "src", "main"};
         String path = String.join(fileSeparator, split);
-        String[] splitMicro = {"output",microName,"src","main"};
+        String[] splitMicro = {"output", microName, "src", "main"};
         String pathMicro = String.join(fileSeparator, splitMicro);
         for (int i = 0; i < list.size(); i++) {
             if (!list.get(i).getName().equals("resources") && !list.get(i).getName().equals("java")) {
-                copyAnotherDirectory(path + fileSeparator+ list.get(i).getName(), System.getProperty("user.dir") +fileSeparator+ pathMicro);
+                copyAnotherDirectory(path + fileSeparator + list.get(i).getName(), System.getProperty("user.dir") + fileSeparator + pathMicro);
             }
         }
     }
@@ -206,16 +206,15 @@ public class CreateProjectMicroServices {
         File f = new File(dirName);
         try {
             File[] listFiles = f.listFiles();
-        for (int i = 0; i < listFiles.length; i++) {
-            if (listFiles[i].isDirectory()) {
-                listFilesOrigin.add(listFiles[i]);
+            for (int i = 0; i < listFiles.length; i++) {
+                if (listFiles[i].isDirectory()) {
+                    listFilesOrigin.add(listFiles[i]);
+                }
             }
-        }
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        
+
         return listFilesOrigin;
     }
 
@@ -227,66 +226,83 @@ public class CreateProjectMicroServices {
             Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    private void createFiles(ArrayList<String>rootList){
+
+    private void createFiles(ArrayList<String> rootList) {
         for (String root : rootList) {
             this.createFileByRoot(root);
         }
     }
-    private void generateFiles(){
+
+    private void generateFiles() {
         ArrayList<String> list = new ArrayList<String>();
-        String[] split = {"output",this.microName,"src","main","java",rootGroupID,"services","register","RegistrationServer.java"};
+        String[] split = {"output", this.microName, "src", "main", "java", rootGroupID, "services", "register", "RegistrationServer.java"};
         String path = String.join(fileSeparator, split);
-        list.add(System.getProperty("user.dir")+fileSeparator+  path); 
+        list.add(System.getProperty("user.dir") + fileSeparator + path);
         this.createFiles(list);
     }
-    private void updateRegister(){
+
+    private void updateRegister() {
         this.generator.updateRegister(microName, rootGroupID);
     }
 
     private void createFolderAfterGroupID() {
-        String[] splitPathDirectory = {this.rootInput,"src", "main", "java", this.rootGroupID};
+        String[] splitPathDirectory = {this.rootInput, "src", "main", "java", this.rootGroupID};
         String pathDirectory = String.join(fileSeparator, splitPathDirectory);
         ArrayList<File> list = listDirectory(pathDirectory);
-        String[] split = {"output",this.microName,"src","main","java", rootGroupID};
+        String[] split = {"output", this.microName, "src", "main", "java", rootGroupID};
         String path = String.join(fileSeparator, split);
         for (int i = 0; i < list.size(); i++) {
-            if(list.get(i).isDirectory()){
+            if (list.get(i).isDirectory()) {
                 String pathFolder = path + fileSeparator + list.get(i).getName();
                 File directory = new File(pathFolder);
                 directory.mkdir();
             }
         }
     }
-    
+
     //Validar caso 3
     private void copyJavaFiles() {
         ArrayList<Vertex> list = graph.getNodesByMicroservice(microName);
-        for (Vertex vertex : list){ 
-            if (vertex.getType().equals("Class")) {
-                String[] origin = {this.rootInput,"src", "main", "java"};
-                String[] originRight = vertex.getPackageName().split("\\.");
-                origin = concatV(origin, originRight);
-                String originPath = String.join(fileSeparator, origin) + fileSeparator + vertex.getName() + ".java";
-                String[] destiny = {"output",this.microName, "src", "main", "java"};
-                String[] destinyRight = vertex.getPackageName().split("\\.");
-                destiny = concatV(destiny, destinyRight);
-                String destinyPath = String.join(fileSeparator, destiny);               
-                
-                if( vertex.getSubType().equalsIgnoreCase("Controller") || vertex.getSubType().equalsIgnoreCase("Service")){
-                    try {
-                        CompilationUnit newCuWebService = StaticJavaParser.parse(new File(originPath));
-                        ArrayList<Vertex> methods = graph.getMethodsByClassId(vertex.getId()); 
-                        this.generator.createClass(newCuWebService, vertex, methods, destinyPath + fileSeparator + vertex.getName()+".java");
-                    } catch (FileNotFoundException ex) {
-                        Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
+        Vertex main = graph.getMainByMicroservice(microName);
+        String[] original = {this.rootInput, "src", "main", "java"};
+        String[] originRight = main.getPackageName().split("\\.");
+        original = concatV(original, originRight);
+        String originPath = String.join(fileSeparator, original) + fileSeparator + main.getName() + ".java";
+        String[] dest = {"output", this.microName, "src", "main", "java"};
+        String[] destinyRight = main.getPackageName().split("\\.");
+        dest = concatV(dest, destinyRight);
+        String destinyPath = String.join(fileSeparator, dest);
+        generator.modifyMain(originPath, destinyPath);
+
+        for (Vertex vertex : list) {
+            if (!vertex.getSubType().equals("SpringBootApplication")) {
+                if (vertex.getType().equals("Class")) {
+                    String[] origin = {this.rootInput, "src", "main", "java"};
+                    originRight = vertex.getPackageName().split("\\.");
+                    origin = concatV(origin, originRight);
+                    originPath = String.join(fileSeparator, origin) + fileSeparator + vertex.getName() + ".java";
+                    String[] destiny = {"output", this.microName, "src", "main", "java"};
+                    destinyRight = vertex.getPackageName().split("\\.");
+                    destiny = concatV(destiny, destinyRight);
+                    destinyPath = String.join(fileSeparator, destiny);
+
+                    if (vertex.getSubType().equalsIgnoreCase("Controller") || vertex.getSubType().equalsIgnoreCase("Service")) {
+                        try {
+                            CompilationUnit newCuWebService = StaticJavaParser.parse(new File(originPath));
+                            ArrayList<Vertex> methods = graph.getMethodsByClassId(vertex.getId());
+                            this.generator.createClass(newCuWebService, vertex, methods, destinyPath + fileSeparator + vertex.getName() + ".java");
+                        } catch (FileNotFoundException ex) {
+                            Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    } else {
+                        copyFile(originPath, destinyPath);
                     }
-                }else {
-                    copyFile(originPath, destinyPath);
                 }
-           }
+            }
+
         }
     }
-    
+
     private String[] concatV(String[] left, String[] right) {
         String[] result = new String[left.length + right.length];
 
@@ -295,59 +311,60 @@ public class CreateProjectMicroServices {
 
         return result;
     }
-    private void createApplicationYML(){
-        String[] splitPathDirectory = {"output",microName,"src", "main", "resources","application.yml"};
+
+    private void createApplicationYML() {
+        String[] splitPathDirectory = {"output", microName, "src", "main", "resources", "application.yml"};
         String pathDirectory = String.join(fileSeparator, splitPathDirectory);
-        File newFile=new File(pathDirectory);
-        
-        String[] splitPathDirectoryOldFile = {"templates","application.yml"};
+        File newFile = new File(pathDirectory);
+
+        String[] splitPathDirectoryOldFile = {"templates", "application.yml"};
         String pathDirectoryOldFile = String.join(fileSeparator, splitPathDirectoryOldFile);
         File oldFile = new File(pathDirectoryOldFile);
         try {
-            if(oldFile.exists()){
-                BufferedReader FileRead= new BufferedReader(new FileReader(oldFile));
+            if (oldFile.exists()) {
+                BufferedReader FileRead = new BufferedReader(new FileReader(oldFile));
                 String nextLine;
-                while((nextLine=FileRead.readLine())!=null) { 
+                while ((nextLine = FileRead.readLine()) != null) {
                     if (nextLine.toUpperCase().trim().equals("    name: name-service".toUpperCase().trim())) {
-                        writeFile(newFile,"    name: "+ microName);
-                    } else if(nextLine.toUpperCase().trim().equals("server.port: 0000".toUpperCase().trim())){
-                        writeFile(newFile,"server.port: "+ port);
-                    } else{
-                         writeFile(newFile,nextLine);
-                    }             
+                        writeFile(newFile, "    name: " + microName);
+                    } else if (nextLine.toUpperCase().trim().equals("server.port: 0000".toUpperCase().trim())) {
+                        writeFile(newFile, "server.port: " + port);
+                    } else {
+                        writeFile(newFile, nextLine);
+                    }
                 }
                 FileRead.close();
             }
-        }catch(Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("CreateAplicationYML: " + e.getMessage());
         }
     }
 
     private void writeFile(File file, String line) {
         try {
-           if(!file.exists()){
-               file.createNewFile();
-           }
-          BufferedWriter fileWriter=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file,true), "utf-8"));
-          fileWriter.write(line + "\r\n");
-          fileWriter.close();
-       } catch (Exception ex) {
-          System.out.println(ex.getMessage());
-       } 
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            BufferedWriter fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, true), "utf-8"));
+            fileWriter.write(line + "\r\n");
+            fileWriter.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
-    private void deleteFile(File file)
-    {
-         try {
-         if(file.exists()){
-           file.delete(); 
-           System.out.println("File deleted");
-         }
-     } catch (Exception ex) {
-          System.out.println(ex.getMessage());
-     }
+
+    private void deleteFile(File file) {
+        try {
+            if (file.exists()) {
+                file.delete();
+                System.out.println("File deleted");
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
-    private void createClass(){
-        
+
+    private void createClass() {
+
     }
 }

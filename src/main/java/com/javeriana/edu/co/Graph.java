@@ -291,4 +291,53 @@ public class Graph {
 //     public List<Vertex> getFieldsByClassId(String classId)
 //    {
 //    }
+    public ArrayList<Vertex> getMethodsByMethodId(String methodId) {
+        ArrayList<Vertex> calls = new ArrayList<>();
+        if(getNodeByNodeId(methodId).getType().equalsIgnoreCase("Method")){
+        
+            ArrayList<Edge> edges = getEdgesBySrcNodeId(methodId); 
+            Vertex aux;
+            for (Edge edge : edges) {
+                if(edge.getTypeRelation().equalsIgnoreCase("Calls")){
+                    aux = getNodeByNodeId(edge.getIdDest());
+                    if(aux.getType().equalsIgnoreCase("Method")){
+                        calls.add(aux);
+                    }
+                }            
+            }
+        }
+        return calls; 
+    }
+    
+    public ArrayList<Vertex> getMethodsDistinctMIcroservices(String methodId) {
+        ArrayList<Vertex> calls = getMethodsByMethodId(methodId);
+        ArrayList<Vertex> returns = new ArrayList<>();
+        Vertex method = getNodeByNodeId(methodId);
+        for (Vertex vertex : calls) {
+            if (!vertex.getMicroservice().equalsIgnoreCase(method.getMicroservice())) {
+                returns.add(vertex);
+            }
+        }
+        return returns; 
+    }
+    
+    public Vertex getMainByMicroservice(String nameMicro) {
+        ArrayList<Vertex> list= getNodesByMicroservice(nameMicro);
+        for (Vertex vertex : list) {
+            if (vertex.getSubType().equalsIgnoreCase("SpringBootApplication")) {
+                return vertex;
+            }
+        }      
+        return null;
+    }
+
+    public Vertex getParentById(String id) {
+        ArrayList<Edge> edges = getEdgesByDstNodeId(id);
+        for (Edge edge : edges) {
+            if(edge.getTypeRelation().equalsIgnoreCase("Has Method")){
+                return getNodeByNodeId(edge.getIdSrc());
+            }
+        }
+        return null;
+    }
 }
