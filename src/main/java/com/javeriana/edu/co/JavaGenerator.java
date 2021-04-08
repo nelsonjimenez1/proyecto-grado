@@ -19,6 +19,7 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.CatchClause;
 import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jdk.nashorn.internal.ir.BlockStatement;
 
 /**
  *
@@ -106,9 +108,7 @@ public class JavaGenerator {
         }
     }
 
-    // New
-    // No orientarlo al grafo 
-    public void createClass(CompilationUnit originalCu, Vertex classNode, ArrayList<Vertex> methods, ArrayList<Vertex> fields) {
+    public void createClass(CompilationUnit originalCu, Vertex classNode, ArrayList<Vertex> methods, ArrayList<Vertex> fields, String rootDest) {
         try {
             System.out.println("createClass");
             CompilationUnit newCu = new CompilationUnit();
@@ -119,41 +119,17 @@ public class JavaGenerator {
             originalCu.findAll(ClassOrInterfaceDeclaration.class).forEach(declaration -> {
                 if (declaration.getName().asString().equals(classNode.getName().trim())) {
                     ClassOrInterfaceDeclaration aux = newCu.addClass(declaration.getName().toString(), getKeywords(declaration.getModifiers()));
-                    addConstructors(declaration, aux);
                     addComplemets(declaration, aux);
                     addAnnotations(declaration, aux);
-                    addFieldsToClass(declaration, aux, fields);
-                    addMethodsToClass(declaration, aux, classNode, methods);
-                    try {
-                        FileWriter myWriter = new FileWriter("Pet.java");
-                        myWriter.write(newCu.toString());
-                        myWriter.close();
-                    } catch (Exception e) {
-                        System.out.println("createClass: " + e.getMessage());
+                    if (fields.size() == 0) {
+                        addFieldsToClass(declaration, aux);
+                        addConstructors(declaration, aux);
+
+                    } else {
+                        addFieldsToClass(declaration, aux, fields);
+                        addConstructors(declaration, aux, fields);
+
                     }
-                }
-            });
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public void createClass(CompilationUnit originalCu, Vertex classNode, ArrayList<Vertex> methods, String rootDest) {
-        try {
-            System.out.println("createClass");
-            CompilationUnit newCu = new CompilationUnit();
-
-            originalCu.getImports().forEach(imp -> newCu.addImport(imp));
-            newCu.setPackageDeclaration(originalCu.getPackageDeclaration().get());
-
-            originalCu.findAll(ClassOrInterfaceDeclaration.class).forEach(declaration -> {
-                if (declaration.getName().asString().equals(classNode.getName().trim())) {
-                    ClassOrInterfaceDeclaration aux = newCu.addClass(declaration.getName().toString(), getKeywords(declaration.getModifiers()));
-                    addConstructors(declaration, aux);
-                    addComplemets(declaration, aux);
-                    addAnnotations(declaration, aux);
-                    addFieldsToClass(declaration, aux);
                     addMethodsToClass(declaration, aux, classNode, methods);
                     System.out.println("Ruta " + rootDest);
                     try {
@@ -178,6 +154,37 @@ public class JavaGenerator {
         originalClass.getConstructors().forEach(constructor -> {
             newConstructor.setParameters(constructor.getParameters());
             newConstructor.setBody(constructor.getBody());
+            newConstructor.setAnnotations(constructor.getAnnotations());
+            if (constructor.getComment().isPresent()) {
+                newConstructor.setComment(constructor.getComment().get());
+            }
+        });
+    }
+
+    public void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> fieldsNodes) {
+
+        ConstructorDeclaration newConstructor = newClass.addConstructor(getKeywords(originalClass.getModifiers()));
+        originalClass.getConstructors().forEach(constructor -> {
+            constructor.getParameters().forEach(parameter -> {
+                for (Vertex fieldsNode : fieldsNodes) {
+                    if (fieldsNode.getName().split("\\.")[1].equalsIgnoreCase(parameter.getNameAsString())) {
+                        newConstructor.addParameter(parameter);
+                    }
+                }
+            });
+
+            BlockStmt blockStmt = new BlockStmt();
+            NodeList<Statement> statements = constructor.getBody().getStatements();
+            for (Statement statement : statements) {
+                for (Vertex fieldsNode : fieldsNodes) {
+                    if (statement.toString().contains(fieldsNode.getName().split("\\.")[1])) {
+                        blockStmt.addStatement(statement);
+                    }
+                }
+
+            }
+
+            newConstructor.setBody(blockStmt);
             newConstructor.setAnnotations(constructor.getAnnotations());
             if (constructor.getComment().isPresent()) {
                 newConstructor.setComment(constructor.getComment().get());
@@ -227,11 +234,11 @@ public class JavaGenerator {
                     aux.setComment(method.getComment().get());
                 }
 
-                ArrayList<Vertex> methodsDistinct = graph.getMethodsDistinctMIcroservices(idVertex);
+                ArrayList<Vertex> methodsDistinct = graph.getMethodsDistinctMicroservices(idVertex);
 
                 if (methodsDistinct.size() != 0) {
                     //TODO prado :v
-                    createRepositoryClass(methodsDistinct, idVertex);
+                    //createRepositoryClass(methodsDistinct, idVertex);
                 } else {
                     aux.setBody(method.getBody().get());
                 }
@@ -247,7 +254,13 @@ public class JavaGenerator {
             // TODO: Fields with Initializer?
             System.out.println("FieldDeclaration name: " + field.getVariables().get(0).getName());
             if (fieldsContains(fieldsNodes, field)) {
-                FieldDeclaration aux = newClass.addField(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), getKeywords(field.getModifiers()));
+                FieldDeclaration aux;
+                if (field.getVariable(0).getInitializer().isPresent()) {
+                    aux = newClass.addFieldWithInitializer(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), field.getVariable(0).getInitializer().get(), getKeywords(field.getModifiers()));
+                } else {
+                    aux = newClass.addField(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), getKeywords(field.getModifiers()));
+
+                }
                 aux.setAnnotations(field.getAnnotations());
                 if (field.getComment().isPresent()) {
                     aux.setComment(field.getComment().get());
@@ -271,13 +284,16 @@ public class JavaGenerator {
 
     private boolean fieldsContains(ArrayList<Vertex> fields, FieldDeclaration field) {
         boolean result = false;
-        /*for(Node f: fields) {
-            if(f.getName().equals(field.getVariables().get(0).getName())) {
+        for (Vertex f : fields) {
+            String split[] = f.getName().split("\\.");
+            String a = split[1];
+            String b = field.getVariables().get(0).getName().asString();
+            if (split[1].equals(field.getVariables().get(0).getName().asString())) {
                 result = true;
                 break;
             }
-        }*/
-        return true;
+        }
+        return result;
     }
 
     // TODO: Validar cant. Parametros y tipo de cada uno
@@ -474,7 +490,6 @@ public class JavaGenerator {
         });
         newMethod.setBody(new BlockStmt().addStatement(new TryStmt().setTryBlock(tryStatement).setCatchClauses(catchClauses)));
     }*/
-
     private static class MethodNameCollector extends VoidVisitorAdapter<List<String>> {
 
         @Override

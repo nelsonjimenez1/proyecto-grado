@@ -223,11 +223,14 @@ public class Graph {
         Collection<String> keys = this.nodes.keySet();
         for (String key : keys) {
             ArrayList<Edge> edgesAux = this.getEdgesBySrcNodeId(nodeId);
-            for (Edge edge : edgesAux) {
+            if (edgesAux!= null) {
+                for (Edge edge : edgesAux) {
                 if (edge.getIdDest().equals(nodeId)) {
                     result.add(edge);
                 }
             }
+            }
+            
         }
 
         return result;
@@ -295,7 +298,7 @@ public class Graph {
         ArrayList<Vertex> calls = new ArrayList<>();
         if(getNodeByNodeId(methodId).getType().equalsIgnoreCase("Method")){
         
-            ArrayList<Edge> edges = getEdgesBySrcNodeId(methodId); 
+            ArrayList<Edge> edges = getEdgesByDstNodeId(methodId); 
             Vertex aux;
             for (Edge edge : edges) {
                 if(edge.getTypeRelation().equalsIgnoreCase("Calls")){
@@ -309,7 +312,7 @@ public class Graph {
         return calls; 
     }
     
-    public ArrayList<Vertex> getMethodsDistinctMIcroservices(String methodId) {
+    public ArrayList<Vertex> getMethodsDistinctMicroservices(String methodId) {
         ArrayList<Vertex> calls = getMethodsByMethodId(methodId);
         ArrayList<Vertex> returns = new ArrayList<>();
         Vertex method = getNodeByNodeId(methodId);
@@ -339,5 +342,23 @@ public class Graph {
             }
         }
         return null;
+    }
+
+    ArrayList<Vertex> getFieldsByClassId(String classId) {
+        ArrayList<Vertex> fieldsByClass = new ArrayList<>();
+        if(getNodeByNodeId(classId).getType().equalsIgnoreCase("Class")){
+        
+            ArrayList<Edge> edges = getEdgesBySrcNodeId(classId); 
+            Vertex aux;
+            for (Edge edge : edges) {
+                if(edge.getTypeRelation().equalsIgnoreCase("Has field")){
+                    aux = getNodeByNodeId(edge.getIdDest());
+                    if(aux.getType().equalsIgnoreCase("Field")){
+                        fieldsByClass.add(aux);
+                    }
+                }            
+            }
+        }
+        return fieldsByClass; 
     }
 }

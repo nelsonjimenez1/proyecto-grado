@@ -164,7 +164,7 @@ public class CreateProjectMicroWeb {
         catchClauses.add(catchStmt);
 
         oldMethod.getAnnotations().forEach(annotation -> {
-            if (annotation.getName().toString().contains("Get")) {
+            if (annotation.getName().toString().toUpperCase().contains("GET")) {
 
                 String controllerUrl = getUrlController(cuController);
                 String url = controllerUrl + annotation.toString().split("value")[1].split("\"")[1];
@@ -179,7 +179,7 @@ public class CreateProjectMicroWeb {
 
                 tryStatement.addStatement(new ReturnStmt(returnStmt));
 
-            } else if (annotation.getName().toString().contains("Post")) {
+            } else if (annotation.getName().toString().toUpperCase().contains("POST")) {
 
                 String controllerUrl = getUrlController(cuController);
                 String url = controllerUrl + annotation.toString().split("value")[1].split("\"")[1];
@@ -198,6 +198,58 @@ public class CreateProjectMicroWeb {
                     returnStmt = "Arrays.asList(" + returnStmt + ")";
                 }
 
+                tryStatement.addStatement(StaticJavaParser.parseStatement(header1));
+                tryStatement.addStatement(StaticJavaParser.parseStatement(header2));
+                tryStatement.addStatement(StaticJavaParser.parseStatement(header3));
+                tryStatement.addStatement(new ReturnStmt(returnStmt));
+
+            } else if(annotation.getName().toString().toUpperCase().contains("DELETE")) {
+                String controllerUrl = getUrlController(cuController);
+                String url = controllerUrl + annotation.toString().split("value")[1].split("\"")[1];
+                String parameters = getStringGetParameters(oldMethod);
+
+                String returnStmt = "restTemplate.delete(serviceUrl + \"" + url + "\", " + parameters + ")";
+
+                tryStatement.addStatement(StaticJavaParser.parseStatement(returnStmt));
+            } else if (annotation.getName().toString().toUpperCase().contains("PUT")) {
+
+                String controllerUrl = getUrlController(cuController);
+                String url = controllerUrl + annotation.toString().split("value")[1].split("\"")[1];
+                String parameters = getStringGetParameters(oldMethod);
+                String postParameter = getPostParameter(oldMethod);
+                String postParameterType = getPostParameterType(oldMethod);
+
+                String header1 = "HttpHeaders headers = new HttpHeaders();";
+                String header2 = "headers.setContentType(MediaType.APPLICATION_JSON);";
+                String header3 = "HttpEntity<" + postParameterType + "> request = new HttpEntity<>(" + postParameter + ", headers);";
+
+                String returnStmt = "restTemplate.put(serviceUrl + \"" + url + "\", request, " + parameters + ")";
+
+                tryStatement.addStatement(StaticJavaParser.parseStatement(header1));
+                tryStatement.addStatement(StaticJavaParser.parseStatement(header2));
+                tryStatement.addStatement(StaticJavaParser.parseStatement(header3));
+                tryStatement.addStatement(new ReturnStmt(returnStmt));
+
+            }
+            else if (annotation.getName().toString().toUpperCase().contains("PATCH")) {
+
+                String controllerUrl = getUrlController(cuController);
+                String url = controllerUrl + annotation.toString().split("value")[1].split("\"")[1];
+                String returnType = getReturnTypeClass(oldMethod);
+                String parameters = getStringGetParameters(oldMethod);
+                String postParameter = getPostParameter(oldMethod);
+                String postParameterType = getPostParameterType(oldMethod);
+
+                String header1 = "HttpHeaders headers = new HttpHeaders();";
+                String header2 = "headers.setContentType(MediaType.APPLICATION_JSON);";
+                String header3 = "HttpEntity<" + postParameterType + "> request = new HttpEntity<>(" + postParameter + ", headers);";
+
+                String returnStmt = "restTemplate.patchForObject(serviceUrl + \"" + url + "\", request, " + returnType + parameters + ")";
+                
+                if (returnType.contains("[]")) {
+                    returnStmt = "Arrays.asList(" + returnStmt + ")";
+                }
+                
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header1));
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header2));
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header3));

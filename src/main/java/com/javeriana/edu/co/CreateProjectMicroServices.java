@@ -290,7 +290,8 @@ public class CreateProjectMicroServices {
                         try {
                             CompilationUnit newCuWebService = StaticJavaParser.parse(new File(originPath));
                             ArrayList<Vertex> methods = graph.getMethodsByClassId(vertex.getId());
-                            this.generator.createClass(newCuWebService, vertex, methods, destinyPath + fileSeparator + vertex.getName() + ".java");
+                            ArrayList<Vertex> fields = graph.getFieldsByClassId(vertex.getId());
+                            this.generator.createClass(newCuWebService, vertex, methods, fields, destinyPath + fileSeparator + vertex.getName() + ".java");
                         } catch (FileNotFoundException ex) {
                             Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
                         }
