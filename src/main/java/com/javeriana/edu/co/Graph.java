@@ -202,7 +202,7 @@ public class Graph {
         return methods;
     }
 
-    // New
+    // Modificar
     public ArrayList<Vertex> getNodesByMicroservice(String microservice) {
         ArrayList<Vertex> result = new ArrayList<>();
 
@@ -222,7 +222,7 @@ public class Graph {
 
         Collection<String> keys = this.nodes.keySet();
         for (String key : keys) {
-            ArrayList<Edge> edgesAux = this.getEdgesBySrcNodeId(nodeId);
+            ArrayList<Edge> edgesAux = this.getEdgesBySrcNodeId(key);
             if (edgesAux!= null) {
                 for (Edge edge : edgesAux) {
                 if (edge.getIdDest().equals(nodeId)) {
@@ -334,7 +334,7 @@ public class Graph {
         return null;
     }
 
-    public Vertex getParentById(String id) {
+    public Vertex getParentByMethodId(String id) {
         ArrayList<Edge> edges = getEdgesByDstNodeId(id);
         for (Edge edge : edges) {
             if(edge.getTypeRelation().equalsIgnoreCase("Has Method")){
@@ -360,5 +360,32 @@ public class Graph {
             }
         }
         return fieldsByClass; 
+    }
+    
+    boolean needExpose(String repositoryId) {
+        boolean result = false;
+        ArrayList<Edge> edges = getEdgesBySrcNodeId(repositoryId);
+        if(edges != null) {
+            for (Edge edge : edges) {
+                if(edge.getTypeRelation().equalsIgnoreCase("has method")) {
+                    ArrayList<Edge> edgesMethod = getEdgesByDstNodeId(edge.getIdDest());
+                    for (Edge edgeM : edgesMethod) {
+                        if(edgeM.getTypeRelation().equalsIgnoreCase("calls")) {
+                            Vertex src = getNodeByNodeId(edgeM.getIdSrc());
+                            Vertex dst = getNodeByNodeId(edgeM.getIdDest());
+                            if(!src.getMicroservice().equals(dst.getMicroservice())) {
+                                result = true;
+                                break;
+                            }
+                        }                        
+                    }
+                    if(result) {
+                        break;
+                    }
+                }
+                
+            }
+        }
+        return result;
     }
 }

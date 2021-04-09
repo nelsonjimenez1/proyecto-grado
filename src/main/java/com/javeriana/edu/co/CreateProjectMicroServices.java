@@ -272,6 +272,7 @@ public class CreateProjectMicroServices {
         String[] destinyRight = main.getPackageName().split("\\.");
         dest = concatV(dest, destinyRight);
         String destinyPath = String.join(fileSeparator, dest);
+        destinyPath += fileSeparator + main.getName() + ".java";
         generator.modifyMain(originPath, destinyPath);
 
         for (Vertex vertex : list) {
@@ -295,7 +296,15 @@ public class CreateProjectMicroServices {
                         } catch (FileNotFoundException ex) {
                             Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                    } else {
+                    } else if (vertex.getSubType().equalsIgnoreCase("Repository")) {
+                        if(graph.needExpose(vertex.getId())) {                            
+                            destinyPath += fileSeparator + vertex.getName() + ".java";
+                            generator.generateExposedRepository(vertex, originPath, destinyPath);
+                        } else {
+                            copyFile(originPath, destinyPath);
+                        }
+                    }
+                    else {
                         copyFile(originPath, destinyPath);
                     }
                 }
@@ -363,9 +372,5 @@ public class CreateProjectMicroServices {
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
-    }
-
-    private void createClass() {
-
-    }
+    }   
 }

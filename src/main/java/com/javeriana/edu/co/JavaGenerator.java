@@ -11,19 +11,27 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Modifier.Keyword;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MemberValuePair;
+import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.CatchClause;
+import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.utils.Pair;
 import com.google.common.io.Files;
 import static com.javeriana.edu.co.CreateProjectMicroServices.fileSeparator;
 import com.javeriana.edu.co.Utils.XMLUtils;
@@ -215,7 +223,6 @@ public class JavaGenerator {
     }
 
     // New
-    // TODO1: Filtrar por una lista de metodos
     private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Vertex classNode, ArrayList<Vertex> methods) {
         System.out.println("methods");
         originalClass.findAll(MethodDeclaration.class).forEach(method -> {
@@ -237,8 +244,7 @@ public class JavaGenerator {
                 ArrayList<Vertex> methodsDistinct = graph.getMethodsDistinctMicroservices(idVertex);
 
                 if (methodsDistinct.size() != 0) {
-                    //TODO prado :v
-                    //createRepositoryClass(methodsDistinct, idVertex);
+                    createRepositoryStubClass(methodsDistinct, idVertex);
                 } else {
                     aux.setBody(method.getBody().get());
                 }
@@ -298,7 +304,6 @@ public class JavaGenerator {
 
     // TODO: Validar cant. Parametros y tipo de cada uno
     private String methodValidate(ArrayList<Vertex> methods, MethodDeclaration method) {
-        String idVertex = "";
         String[] splitSignature;
         String[] splitVertex;
         String[] parameterSignature;
@@ -367,10 +372,30 @@ public class JavaGenerator {
             String import1 = "org.springframework.web.client.RestTemplate";
             String import2 = "org.springframework.cloud.client.loadbalancer.LoadBalanced";
             String import3 = "org.springframework.context.annotation.Bean";
+            String import4 = "org.springframework.cloud.client.discovery.EnableDiscoveryClient";
+            String import5 = ".services.registration.RegistrationServer";
+            import5 = groupID + import5;
             cuMain.addImport(import1);
             cuMain.addImport(import2);
             cuMain.addImport(import3);
-            MethodDeclaration mdTemplate = cuMain.findAll(ClassOrInterfaceDeclaration.class).get(0).addMethod("restTemplate");
+            cuMain.addImport(import4);
+            cuMain.addImport(import5);
+            ClassOrInterfaceDeclaration classMain = cuMain.findAll(ClassOrInterfaceDeclaration.class).get(0);
+            classMain.addAnnotation("EnableDiscoveryClient");
+            List<MethodDeclaration> methods = cuMain.findAll(MethodDeclaration.class);
+            for (MethodDeclaration method : methods) {
+                if (method.getNameAsString().equalsIgnoreCase("main")) {
+                    BlockStmt oldBody = method.getBody().get();
+                    BlockStmt newBody = new BlockStmt().addStatement(new IfStmt(StaticJavaParser.parseExpression("System.getProperty(RegistrationServer.REGISTRATION_SERVER_HOSTNAME) == null"),
+                            StaticJavaParser.parseStatement("System.setProperty(RegistrationServer.REGISTRATION_SERVER_HOSTNAME, \"localhost\");"), null));
+                    oldBody.getStatements().forEach(stmt -> {
+                        newBody.addStatement(stmt);
+                    });
+                    method.setBody(newBody);
+                    break;
+                }
+            }
+            MethodDeclaration mdTemplate = classMain.addMethod("restTemplate");
             mdTemplate.addAnnotation("LoadBalanced");
             mdTemplate.addAnnotation("Bean");
             BlockStmt returnSmt = new BlockStmt();
@@ -390,84 +415,128 @@ public class JavaGenerator {
 
     }
 
-    private void createRepositoryClass(ArrayList<Vertex> vertices, String idVertexDestMicro) {
-        ArrayList<Vertex> createdParents = new ArrayList<>();
+    private void createRepositoryStubClass(ArrayList<Vertex> methodVertices, String idVertexDestMicro) {
+        ArrayList<Vertex> createdParents = new ArrayList<>(); // Falta agregar los creados
         Vertex vertexDestMicro = graph.getNodeByNodeId(idVertexDestMicro);
-        for (Vertex vertex : vertices) {
-            Vertex parent = graph.getParentById(vertex.getId());
-            String[] origin = {this.rootInput, "src", "main", "java"};
-            String[] originRight = vertex.getPackageName().split("\\.");
-            origin = concatV(origin, originRight);
-            String originPath = String.join(fileSeparator, origin) + fileSeparator + parent.getName() + ".java";
-            String[] dest = {"output", vertexDestMicro.getMicroservice(), "src", "main", "java"};
-            String[] destinyRight = parent.getPackageName().split("\\.");
-            dest = concatV(dest, destinyRight);
-            String destinyPath = String.join(fileSeparator, dest);
-            try {
+        for (Vertex methodVertex : methodVertices) {
+            Vertex parent = graph.getParentByMethodId(methodVertex.getId());
+            if (createdParents.contains(parent)) {
 
-                CompilationUnit cuParent = StaticJavaParser.parse(new File(originPath));
-                CompilationUnit cuDestiny = new CompilationUnit();
-                cuDestiny.addImport("org.springframework.web.client.RestTemplate");
-                cuDestiny.addImport("org.springframework.cloud.client.loadbalancer.LoadBalanced");
-                cuDestiny.addImport("org.springframework.beans.factory.annotation.Autowired");
-                ClassOrInterfaceDeclaration classParent = cuParent.findAll(ClassOrInterfaceDeclaration.class).get(0);
-                ClassOrInterfaceDeclaration classDestiny = cuDestiny.addClass(classParent.getNameAsString());
-                NodeList<Modifier> modifiers = new NodeList<>();
-                modifiers.add(Modifier.publicModifier());
-                FieldDeclaration fdDestiny = classDestiny.addField("RestTemplate", "resTemplate", getKeywords(modifiers));
-                fdDestiny.addAnnotation("Autowired");
-                fdDestiny.addAnnotation("LoadBalanced");
-                NodeList<Modifier> modifiers2 = new NodeList<>();
-                modifiers2.add(Modifier.publicModifier());
-                modifiers2.add(Modifier.finalModifier());
-                modifiers2.add(Modifier.staticModifier());
-                classDestiny.addFieldWithInitializer("String", "URL", StaticJavaParser.parseExpression("\"" + "http://" + parent.getMicroservice().toUpperCase() + "\""), getKeywords(modifiers2));
-                classDestiny.addConstructor(getKeywords(modifiers));
-                List<MethodDeclaration> methods = classParent.getMethods();
-                for (MethodDeclaration method : methods) {
-                    if (equalsMethod(method, vertexDestMicro)) {
-                        MethodDeclaration auxMethod = classDestiny.addMethod(method.getNameAsString(), getKeywords(method.getModifiers()));
-                        auxMethod.setType(method.getType());
-                        method.getParameters().forEach(parameter -> {
-                            Parameter p = parameter.clone();
-                            p.getAnnotations().clear();
-                            auxMethod.addParameter(p);
-                        });
+                String[] origin = {this.rootInput, "src", "main", "java"};
+                String[] originRight = methodVertex.getPackageName().split("\\.");
+                origin = concatV(origin, originRight);
+                String originPath = String.join(fileSeparator, origin) + fileSeparator + parent.getName() + ".java";
+                String[] dest = {"output", vertexDestMicro.getMicroservice(), "src", "main", "java"};
+                String[] destinyRight = parent.getPackageName().split("\\.");
+                dest = concatV(dest, destinyRight);
+                String destinyPath = String.join(fileSeparator, dest) + fileSeparator + parent.getName() + ".java";
 
+                try {
+
+                    CompilationUnit cuParent = StaticJavaParser.parse(new File(originPath));
+                    CompilationUnit cuDestiny = new CompilationUnit();
+                    cuDestiny.addImport("org.springframework.web.client.RestTemplate");
+                    cuDestiny.addImport("org.springframework.cloud.client.loadbalancer.LoadBalanced");
+                    cuDestiny.addImport("org.springframework.beans.factory.annotation.Autowired");
+
+                    ClassOrInterfaceDeclaration classParent = cuParent.findAll(ClassOrInterfaceDeclaration.class).get(0);
+                    ClassOrInterfaceDeclaration classDestiny = cuDestiny.addClass(classParent.getNameAsString());
+
+                    NodeList<Modifier> modifiers = new NodeList<>();
+                    modifiers.add(Modifier.publicModifier());
+
+                    FieldDeclaration fdDestiny = classDestiny.addField("RestTemplate", "resTemplate", getKeywords(modifiers));
+                    fdDestiny.addAnnotation("Autowired");
+                    fdDestiny.addAnnotation("LoadBalanced");
+
+                    NodeList<Modifier> modifiers2 = new NodeList<>();
+                    modifiers2.add(Modifier.publicModifier());
+                    modifiers2.add(Modifier.finalModifier());
+                    modifiers2.add(Modifier.staticModifier());
+                    classDestiny.addFieldWithInitializer("String", "URL", StaticJavaParser.parseExpression("\"" + "http://" + parent.getMicroservice().toUpperCase() + "\""), getKeywords(modifiers2));
+                    classDestiny.addConstructor(getKeywords(modifiers));
+
+                    List<MethodDeclaration> methods = classParent.getMethods();
+                    for (MethodDeclaration method : methods) {
+                        if (equalsMethod(method, vertexDestMicro)) { // No se sabe si funciona
+                            MethodDeclaration newMethod = classDestiny.addMethod(method.getNameAsString(), getKeywords(method.getModifiers()));
+                            newMethod.setType(method.getType());
+                            method.getParameters().forEach(parameter -> {
+                                Parameter p = parameter.clone();
+                                p.getAnnotations().clear();
+                                newMethod.addParameter(p);
+                            });
+
+                            String callType = getMethodCallType(method);
+
+                            createBody(method, newMethod, callType);
+                            createdParents.add(methodVertex);                                                                                   
+                        }
                     }
-                }
+                    
+                    FileWriter myWriter = new FileWriter(destinyPath);
+                    myWriter.write(cuDestiny.toString());
+                    myWriter.close();
 
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(JavaGenerator.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    System.out.println("Error: " + ex.getMessage());
+                }
             }
         }
     }
 
-    /*private void createBody(MethodDeclaration oldMethod, MethodDeclaration newMethod) {
-        BlockStmt tryStatement = new BlockStmt();
+    private String getMethodCallType(MethodDeclaration method) {
+        String callType = "";
 
+        if (method.getNameAsString().equals("findAll") || method.getNameAsString().equals("findByID")) {
+            callType = "GET";
+        } else if (method.getNameAsString().equals("save")) {
+            callType = "POST";
+        } else if (method.getNameAsString().equals("delete")) {
+            callType = "DELETE";
+        }
+
+        if (callType.equals("")) {
+            NodeList<AnnotationExpr> annotations = method.getAnnotations();
+            for (AnnotationExpr annotation : annotations) {
+                if (annotation.toString().contains("Query")) {
+                    callType = "GET";
+                    break;
+                }
+            }
+        }
+
+        return callType;
+    }
+
+    private void createBody(MethodDeclaration oldMethod, MethodDeclaration newMethod, String callType) {
+        BlockStmt tryStatement = new BlockStmt();
         NodeList<CatchClause> catchClauses = new NodeList<>();
         CatchClause catchStmt = new CatchClause();
         catchStmt.setParameter(new Parameter(new TypeParameter("Exception"), "e")).setBody(new BlockStmt().addStatement(StaticJavaParser.parseStatement("System.out.println(e.getMessage());")));
         catchClauses.add(catchStmt);
 
-        oldMethod.getAnnotations().forEach(annotation -> {
-            if (annotation.getName().toString().contains("Get")) {
+        switch (callType) {
+            case "GET":
                 
-                String returnStmt = "restTemplate.getForObject(serviceUrl + \"" + url + "\", " + returnType + parameters + ")";
+                String url = "URL + \"/interface/search/" + oldMethod.getNameAsString() + getStringUrlParameters(oldMethod) + "\"";
+                String returnType = getReturnTypeClass(oldMethod);
+                String parameters = getStringGetParameters(oldMethod);
+                
+                String returnStmt = "restTemplate.getForObject(" + url + ", " + returnType + parameters + ")";
 
                 if (returnType.contains("[]")) {
                     returnStmt = "Arrays.asList(" + returnStmt + ")";
                 }
 
                 tryStatement.addStatement(new ReturnStmt(returnStmt));
+                break;
 
-            } else if (annotation.getName().toString().contains("Post")) {
-
-                String controllerUrl = getUrlController(cuController);
-                String url = controllerUrl + annotation.toString().split("value")[1].split("\"")[1];
-                String returnType = getReturnTypeClass(oldMethod);
-                String parameters = getStringGetParameters(oldMethod);
+            case "POST":
+                
+                url = "URL + \"/interface\"";
+                returnType = getReturnTypeClass(oldMethod);
+                //parameters = getStringGetParameters(oldMethod); Save con parametros además del objeto?
                 String postParameter = getPostParameter(oldMethod);
                 String postParameterType = getPostParameterType(oldMethod);
 
@@ -475,21 +544,91 @@ public class JavaGenerator {
                 String header2 = "headers.setContentType(MediaType.APPLICATION_JSON);";
                 String header3 = "HttpEntity<" + postParameterType + "> request = new HttpEntity<>(" + postParameter + ", headers);";
 
-                String returnStmt = "restTemplate.postForObject(serviceUrl + \"" + url + "\", request, " + returnType + parameters + ")";
+                returnStmt = "restTemplate.postForObject(" + url + ", request, " + returnType + ")";
 
-                if (returnType.contains("[]")) {
+                /*if (returnType.contains("[]")) {
                     returnStmt = "Arrays.asList(" + returnStmt + ")";
-                }
+                }*/ //Save puede devolver Arreglos?
 
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header1));
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header2));
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header3));
                 tryStatement.addStatement(new ReturnStmt(returnStmt));
+                break;
 
-            }
-        });
+            case "DELETE":
+                
+                url = "URL + \"/interface"+ getStringUrlParameters(oldMethod) + "\"";;
+                parameters = getStringGetParameters(oldMethod);
+
+                returnStmt = "restTemplate.delete(" + url + parameters + ")";
+
+                tryStatement.addStatement(StaticJavaParser.parseStatement(returnStmt));
+                break;
+
+            default:
+                System.out.println("Error in com.javeriana.edu.co.JavaGenerator.createBody(), No CallType");
+        }
+
+        
         newMethod.setBody(new BlockStmt().addStatement(new TryStmt().setTryBlock(tryStatement).setCatchClauses(catchClauses)));
-    }*/
+    }
+    
+    private String getPostParameterType(MethodDeclaration method) {
+        String string = "";
+        for (Parameter parameter : method.getParameters()) {
+            string = parameter.getTypeAsString();
+            break;
+        }
+        return string;
+    }
+
+    private String getPostParameter(MethodDeclaration method) {
+        String string = "";
+        for (Parameter parameter : method.getParameters()) {           
+            string = parameter.getNameAsString();
+            break;
+        }
+        return string;
+    }
+    
+    private String getStringGetParameters(MethodDeclaration method) {
+        String string = "";
+        for (Parameter parameter : method.getParameters()) {
+            for (AnnotationExpr annotation : parameter.getAnnotations()) {
+                if (annotation.toString().contains("Param")) {
+                    string += ", " + parameter.getNameAsString();
+                }
+            }
+        }
+        return string;
+    }
+    
+    private String getStringUrlParameters(MethodDeclaration method) {
+        String string = "?";
+        for (Parameter parameter : method.getParameters()) {
+            for (AnnotationExpr annotation : parameter.getAnnotations()) {
+                SingleMemberAnnotationExpr singleMembAnnot = (SingleMemberAnnotationExpr) annotation;                
+                if (annotation.toString().contains("Param")) {                   
+                    string += singleMembAnnot.getMemberValue().toString() + "={" +parameter.getNameAsString() + "}&";
+                }
+            }
+        }
+        return string.substring(0, string.length()-1);
+    }
+
+    private String getReturnTypeClass(MethodDeclaration method) {
+
+        String returnType = method.getTypeAsString();
+
+        if (returnType.contains("<") && returnType.contains(">")) { // TODO: Preguntar al profe: Collection<Collection<Entity>> ???
+            returnType = returnType.split("<")[1].split(">")[0];
+            returnType += "[]";
+        }
+
+        return returnType + ".class";
+    }
+
     private static class MethodNameCollector extends VoidVisitorAdapter<List<String>> {
 
         @Override
@@ -501,7 +640,6 @@ public class JavaGenerator {
     }
 
     private boolean equalsMethod(MethodDeclaration method, Vertex m) {
-        String idVertex = "";
         String[] splitSignature;
         String[] splitVertex;
         String[] parameterSignature;
@@ -542,6 +680,29 @@ public class JavaGenerator {
             result = false;
         }
         return result;
+    }
+
+    public void generateExposedRepository(Vertex vertex, String srcPath, String dstPath) {
+        try {
+            CompilationUnit cuRepo = StaticJavaParser.parse(new File(srcPath));
+            String import1 = "org.springframework.data.rest.core.annotation.RepositoryRestResource";
+            String annotation = "RepositoryRestResource";
+            cuRepo.addImport(import1);
+            cuRepo.findAll(ClassOrInterfaceDeclaration.class).forEach(cd -> {
+                if (cd.getNameAsString().equals(vertex.getName())) {
+                    NodeList<MemberValuePair> aux = new NodeList<>();
+                    aux.add(new MemberValuePair("path", StaticJavaParser.parseExpression("\"interface\"")));
+                    cd.addAnnotation(new NormalAnnotationExpr(new Name(annotation), aux));
+                }
+            });
+            FileWriter myWriter = new FileWriter(dstPath);
+            myWriter.write(cuRepo.toString());
+            myWriter.close();
+
+        } catch (Exception ex) {
+            System.out.println("ERROR: " + ex.getMessage());
+        }
+
     }
 
 }
