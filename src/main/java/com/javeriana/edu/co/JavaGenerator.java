@@ -18,6 +18,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
@@ -416,11 +417,11 @@ public class JavaGenerator {
     }
 
     private void createRepositoryStubClass(ArrayList<Vertex> methodVertices, String idVertexDestMicro) {
-        ArrayList<Vertex> createdParents = new ArrayList<>(); // Falta agregar los creados
+        ArrayList<Vertex> createdParents = new ArrayList<>();
         Vertex vertexDestMicro = graph.getNodeByNodeId(idVertexDestMicro);
         for (Vertex methodVertex : methodVertices) {
             Vertex parent = graph.getParentByMethodId(methodVertex.getId());
-            if (createdParents.contains(parent)) {
+            if (!createdParents.contains(parent)) {
 
                 String[] origin = {this.rootInput, "src", "main", "java"};
                 String[] originRight = methodVertex.getPackageName().split("\\.");
@@ -445,9 +446,9 @@ public class JavaGenerator {
                     NodeList<Modifier> modifiers = new NodeList<>();
                     modifiers.add(Modifier.publicModifier());
 
-                    FieldDeclaration fdDestiny = classDestiny.addField("RestTemplate", "resTemplate", getKeywords(modifiers));
-                    fdDestiny.addAnnotation("Autowired");
-                    fdDestiny.addAnnotation("LoadBalanced");
+                    FieldDeclaration fdDestiny = classDestiny.addField("RestTemplate", "restTemplate", getKeywords(modifiers));
+                    fdDestiny.addAnnotation(new MarkerAnnotationExpr("Autowired"));
+                    fdDestiny.addAnnotation(new MarkerAnnotationExpr("LoadBalanced"));
 
                     NodeList<Modifier> modifiers2 = new NodeList<>();
                     modifiers2.add(Modifier.publicModifier());
@@ -458,9 +459,9 @@ public class JavaGenerator {
 
                     List<MethodDeclaration> methods = classParent.getMethods();
                     for (MethodDeclaration method : methods) {
-                        if (equalsMethod(method, vertexDestMicro)) { // No se sabe si funciona
+                        if (equalsMethod(method, methodVertex)) {
                             MethodDeclaration newMethod = classDestiny.addMethod(method.getNameAsString(), getKeywords(method.getModifiers()));
-                            newMethod.setType(method.getType());
+                            newMethod.setType(method.getType().toString().contains("Optional") ? method.getType().toString().split("<")[1].split(">")[0] : method.getType().toString());
                             method.getParameters().forEach(parameter -> {
                                 Parameter p = parameter.clone();
                                 p.getAnnotations().clear();
@@ -470,10 +471,11 @@ public class JavaGenerator {
                             String callType = getMethodCallType(method);
 
                             createBody(method, newMethod, callType);
-                            createdParents.add(methodVertex);                                                                                   
+                            createdParents.add(methodVertex);
+                            break;
                         }
                     }
-                    
+
                     FileWriter myWriter = new FileWriter(destinyPath);
                     myWriter.write(cuDestiny.toString());
                     myWriter.close();
@@ -518,11 +520,11 @@ public class JavaGenerator {
 
         switch (callType) {
             case "GET":
-                
+
                 String url = "URL + \"/interface/search/" + oldMethod.getNameAsString() + getStringUrlParameters(oldMethod) + "\"";
                 String returnType = getReturnTypeClass(oldMethod);
                 String parameters = getStringGetParameters(oldMethod);
-                
+
                 String returnStmt = "restTemplate.getForObject(" + url + ", " + returnType + parameters + ")";
 
                 if (returnType.contains("[]")) {
@@ -533,7 +535,7 @@ public class JavaGenerator {
                 break;
 
             case "POST":
-                
+
                 url = "URL + \"/interface\"";
                 returnType = getReturnTypeClass(oldMethod);
                 //parameters = getStringGetParameters(oldMethod); Save con parametros además del objeto?
@@ -549,7 +551,6 @@ public class JavaGenerator {
                 /*if (returnType.contains("[]")) {
                     returnStmt = "Arrays.asList(" + returnStmt + ")";
                 }*/ //Save puede devolver Arreglos?
-
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header1));
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header2));
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header3));
@@ -557,8 +558,9 @@ public class JavaGenerator {
                 break;
 
             case "DELETE":
-                
-                url = "URL + \"/interface"+ getStringUrlParameters(oldMethod) + "\"";;
+
+                url = "URL + \"/interface" + getStringUrlParameters(oldMethod) + "\"";
+                ;
                 parameters = getStringGetParameters(oldMethod);
 
                 returnStmt = "restTemplate.delete(" + url + parameters + ")";
@@ -570,10 +572,9 @@ public class JavaGenerator {
                 System.out.println("Error in com.javeriana.edu.co.JavaGenerator.createBody(), No CallType");
         }
 
-        
         newMethod.setBody(new BlockStmt().addStatement(new TryStmt().setTryBlock(tryStatement).setCatchClauses(catchClauses)));
     }
-    
+
     private String getPostParameterType(MethodDeclaration method) {
         String string = "";
         for (Parameter parameter : method.getParameters()) {
@@ -585,13 +586,13 @@ public class JavaGenerator {
 
     private String getPostParameter(MethodDeclaration method) {
         String string = "";
-        for (Parameter parameter : method.getParameters()) {           
+        for (Parameter parameter : method.getParameters()) {
             string = parameter.getNameAsString();
             break;
         }
         return string;
     }
-    
+
     private String getStringGetParameters(MethodDeclaration method) {
         String string = "";
         for (Parameter parameter : method.getParameters()) {
@@ -603,18 +604,18 @@ public class JavaGenerator {
         }
         return string;
     }
-    
+
     private String getStringUrlParameters(MethodDeclaration method) {
         String string = "?";
         for (Parameter parameter : method.getParameters()) {
             for (AnnotationExpr annotation : parameter.getAnnotations()) {
-                SingleMemberAnnotationExpr singleMembAnnot = (SingleMemberAnnotationExpr) annotation;                
-                if (annotation.toString().contains("Param")) {                   
-                    string += singleMembAnnot.getMemberValue().toString() + "={" +parameter.getNameAsString() + "}&";
+                SingleMemberAnnotationExpr singleMembAnnot = (SingleMemberAnnotationExpr) annotation;
+                if (annotation.toString().contains("Param")) {
+                    string += singleMembAnnot.getMemberValue().toString() + "={" + parameter.getNameAsString() + "}&";
                 }
             }
         }
-        return string.substring(0, string.length()-1);
+        return string.substring(0, string.length() - 1);
     }
 
     private String getReturnTypeClass(MethodDeclaration method) {
@@ -622,8 +623,10 @@ public class JavaGenerator {
         String returnType = method.getTypeAsString();
 
         if (returnType.contains("<") && returnType.contains(">")) { // TODO: Preguntar al profe: Collection<Collection<Entity>> ???
-            returnType = returnType.split("<")[1].split(">")[0];
-            returnType += "[]";
+            String returnTypeAux = returnType.split("<")[1].split(">")[0];
+            if(!returnType.contains("Optional"))
+                returnTypeAux += "[]";
+            returnType = returnTypeAux;
         }
 
         return returnType + ".class";

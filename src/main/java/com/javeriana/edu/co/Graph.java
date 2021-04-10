@@ -298,16 +298,19 @@ public class Graph {
         ArrayList<Vertex> calls = new ArrayList<>();
         if(getNodeByNodeId(methodId).getType().equalsIgnoreCase("Method")){
         
-            ArrayList<Edge> edges = getEdgesByDstNodeId(methodId); 
-            Vertex aux;
-            for (Edge edge : edges) {
-                if(edge.getTypeRelation().equalsIgnoreCase("Calls")){
-                    aux = getNodeByNodeId(edge.getIdDest());
-                    if(aux.getType().equalsIgnoreCase("Method")){
-                        calls.add(aux);
-                    }
-                }            
-            }
+            ArrayList<Edge> edges = getEdgesBySrcNodeId(methodId); 
+            if(edges != null) {
+                Vertex aux;
+                for (Edge edge : edges) {
+                    if(edge.getTypeRelation().equalsIgnoreCase("Calls")){
+                        aux = getNodeByNodeId(edge.getIdDest());
+                        if(aux.getType().equalsIgnoreCase("Method")){
+                            calls.add(aux);
+                        }
+                    }            
+                }
+            }            
+            
         }
         return calls; 
     }
