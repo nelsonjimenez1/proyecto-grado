@@ -80,11 +80,11 @@ public class JavaGenerator {
     public void updateRegister(String nameMicroService, String rooteGroupID) {
         try {
             String[] splitRegistrationServer = {"templates", "RegistrationServer.java"};
-            String[] splitRegistrationServerWrite = {"output", nameMicroService, "src", "main", "java", rooteGroupID, "services", "register", "RegistrationServer.java"};
+            String[] splitRegistrationServerWrite = {"output", nameMicroService, "src", "main", "java", rooteGroupID, "services", "registration", "RegistrationServer.java"};
             String path = String.join(fileSeparator, splitRegistrationServer);
             String pathWriteFile = String.join(fileSeparator, splitRegistrationServerWrite);
             CompilationUnit cu = StaticJavaParser.parse(new File(System.getProperty("user.dir"), path));
-            cu.setPackageDeclaration(this.groupID + ".services.register");
+            cu.setPackageDeclaration(this.groupID + ".services.registration");
             FileWriter myWriter = new FileWriter(System.getProperty("user.dir") + fileSeparator + pathWriteFile);
             myWriter.write(cu.toString());
             myWriter.close();
@@ -375,13 +375,16 @@ public class JavaGenerator {
             String import3 = "org.springframework.context.annotation.Bean";
             String import4 = "org.springframework.cloud.client.discovery.EnableDiscoveryClient";
             String import5 = ".services.registration.RegistrationServer";
+            String import6 = "org.springframework.context.annotation.ComponentScan";
             import5 = groupID + import5;
             cuMain.addImport(import1);
             cuMain.addImport(import2);
             cuMain.addImport(import3);
             cuMain.addImport(import4);
             cuMain.addImport(import5);
+            cuMain.addImport(import6);
             ClassOrInterfaceDeclaration classMain = cuMain.findAll(ClassOrInterfaceDeclaration.class).get(0);
+            classMain.addAnnotation(new SingleMemberAnnotationExpr(new Name("ComponentScan"), StaticJavaParser.parseExpression("\""+groupID+"\"")));
             classMain.addAnnotation("EnableDiscoveryClient");
             List<MethodDeclaration> methods = cuMain.findAll(MethodDeclaration.class);
             for (MethodDeclaration method : methods) {
@@ -397,8 +400,9 @@ public class JavaGenerator {
                 }
             }
             MethodDeclaration mdTemplate = classMain.addMethod("restTemplate");
-            mdTemplate.addAnnotation("LoadBalanced");
-            mdTemplate.addAnnotation("Bean");
+            mdTemplate.setType("RestTemplate");
+            mdTemplate.addAnnotation(new MarkerAnnotationExpr("LoadBalanced"));
+            mdTemplate.addAnnotation(new MarkerAnnotationExpr("Bean"));
             BlockStmt returnSmt = new BlockStmt();
             returnSmt.addStatement(new ReturnStmt("new RestTemplate()"));
             mdTemplate.setBody(returnSmt);
