@@ -66,6 +66,10 @@ public class CreateProjectMicroServices {
             updateRegister();
             copyJavaFiles();
             createApplicationYML();
+            
+            DockerGenerator dockerG = new DockerGenerator();
+            dockerG.generateDockerFile(microName);
+            
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
