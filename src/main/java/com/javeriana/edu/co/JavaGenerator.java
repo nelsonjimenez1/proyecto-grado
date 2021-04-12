@@ -158,9 +158,9 @@ public class JavaGenerator {
 
     // TODO: Modificar Constructor para que solo inicialice y reciba los atributos que son indicados en el grafo? -> Caso de generar nosotros constructores
     // TODO: Filtrar por lista de constructores? -> No generar xD
-    public void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
-        ConstructorDeclaration newConstructor = newClass.addConstructor(getKeywords(originalClass.getModifiers()));
+    public void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {        
         originalClass.getConstructors().forEach(constructor -> {
+            ConstructorDeclaration newConstructor = newClass.addConstructor(getKeywords(constructor.getModifiers()));
             newConstructor.setParameters(constructor.getParameters());
             newConstructor.setBody(constructor.getBody());
             newConstructor.setAnnotations(constructor.getAnnotations());
@@ -171,9 +171,9 @@ public class JavaGenerator {
     }
 
     public void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> fieldsNodes) {
-
-        ConstructorDeclaration newConstructor = newClass.addConstructor(getKeywords(originalClass.getModifiers()));
+      
         originalClass.getConstructors().forEach(constructor -> {
+            ConstructorDeclaration newConstructor = newClass.addConstructor(getKeywords(constructor.getModifiers()));
             constructor.getParameters().forEach(parameter -> {
                 for (Vertex fieldsNode : fieldsNodes) {
                     if (fieldsNode.getName().split("\\.")[1].equalsIgnoreCase(parameter.getNameAsString())) {
@@ -245,10 +245,9 @@ public class JavaGenerator {
                 ArrayList<Vertex> methodsDistinct = graph.getMethodsDistinctMicroservices(idVertex);
 
                 if (methodsDistinct.size() != 0) {
-                    createRepositoryStubClass(methodsDistinct, idVertex);
-                } else {
-                    aux.setBody(method.getBody().get());
+                    createRepositoryStubClass(methodsDistinct, idVertex, newClass);                    
                 }
+                aux.setBody(method.getBody().get());
             }
         });
     }
@@ -384,8 +383,8 @@ public class JavaGenerator {
             cuMain.addImport(import5);
             cuMain.addImport(import6);
             ClassOrInterfaceDeclaration classMain = cuMain.findAll(ClassOrInterfaceDeclaration.class).get(0);
-            classMain.addAnnotation(new SingleMemberAnnotationExpr(new Name("ComponentScan"), StaticJavaParser.parseExpression("\""+groupID+"\"")));
-            classMain.addAnnotation("EnableDiscoveryClient");
+            //classMain.addAnnotation(new SingleMemberAnnotationExpr(new Name("ComponentScan"), StaticJavaParser.parseExpression("\""+groupID+"\"")));
+            classMain.addAnnotation(new MarkerAnnotationExpr("EnableDiscoveryClient"));
             List<MethodDeclaration> methods = cuMain.findAll(MethodDeclaration.class);
             for (MethodDeclaration method : methods) {
                 if (method.getNameAsString().equalsIgnoreCase("main")) {
@@ -420,7 +419,7 @@ public class JavaGenerator {
 
     }
 
-    private void createRepositoryStubClass(ArrayList<Vertex> methodVertices, String idVertexDestMicro) {
+    private void createRepositoryStubClass(ArrayList<Vertex> methodVertices, String idVertexDestMicro, ClassOrInterfaceDeclaration srcClass) {
         ArrayList<Vertex> createdParents = new ArrayList<>();
         Vertex vertexDestMicro = graph.getNodeByNodeId(idVertexDestMicro);
         for (Vertex methodVertex : methodVertices) {
@@ -440,12 +439,20 @@ public class JavaGenerator {
 
                     CompilationUnit cuParent = StaticJavaParser.parse(new File(originPath));
                     CompilationUnit cuDestiny = new CompilationUnit();
+                    cuDestiny.setPackageDeclaration(parent.getPackageName());
                     cuDestiny.addImport("org.springframework.web.client.RestTemplate");
                     cuDestiny.addImport("org.springframework.cloud.client.loadbalancer.LoadBalanced");
                     cuDestiny.addImport("org.springframework.beans.factory.annotation.Autowired");
-
+                    cuDestiny.addImport("org.springframework.stereotype.Component");
+                    
+                    cuParent.getImports().forEach(imp -> {
+                        cuDestiny.addImport(imp);
+                    });
+                    
                     ClassOrInterfaceDeclaration classParent = cuParent.findAll(ClassOrInterfaceDeclaration.class).get(0);
                     ClassOrInterfaceDeclaration classDestiny = cuDestiny.addClass(classParent.getNameAsString());
+                    
+                    classDestiny.addAnnotation(new MarkerAnnotationExpr("Component"));
 
                     NodeList<Modifier> modifiers = new NodeList<>();
                     modifiers.add(Modifier.publicModifier());
@@ -459,13 +466,12 @@ public class JavaGenerator {
                     modifiers2.add(Modifier.finalModifier());
                     modifiers2.add(Modifier.staticModifier());
                     classDestiny.addFieldWithInitializer("String", "URL", StaticJavaParser.parseExpression("\"" + "http://" + parent.getMicroservice().toUpperCase() + "\""), getKeywords(modifiers2));
-                    classDestiny.addConstructor(getKeywords(modifiers));
 
                     List<MethodDeclaration> methods = classParent.getMethods();
                     for (MethodDeclaration method : methods) {
                         if (equalsMethod(method, methodVertex)) {
                             MethodDeclaration newMethod = classDestiny.addMethod(method.getNameAsString(), getKeywords(method.getModifiers()));
-                            newMethod.setType(method.getType().toString().contains("Optional") ? method.getType().toString().split("<")[1].split(">")[0] : method.getType().toString());
+                            newMethod.setType(method.getType().toString());
                             method.getParameters().forEach(parameter -> {
                                 Parameter p = parameter.clone();
                                 p.getAnnotations().clear();
@@ -483,7 +489,7 @@ public class JavaGenerator {
                     FileWriter myWriter = new FileWriter(destinyPath);
                     myWriter.write(cuDestiny.toString());
                     myWriter.close();
-
+                    //updateConstructorAutowired(srcClass, parent.getName().toString());
                 } catch (Exception ex) {
                     System.out.println("Error: " + ex.getMessage());
                 }
@@ -519,7 +525,7 @@ public class JavaGenerator {
         BlockStmt tryStatement = new BlockStmt();
         NodeList<CatchClause> catchClauses = new NodeList<>();
         CatchClause catchStmt = new CatchClause();
-        catchStmt.setParameter(new Parameter(new TypeParameter("Exception"), "e")).setBody(new BlockStmt().addStatement(StaticJavaParser.parseStatement("System.out.println(e.getMessage());")));
+        catchStmt.setParameter(new Parameter(new TypeParameter("Exception"), "e")).setBody(new BlockStmt().addStatement(StaticJavaParser.parseStatement("System.out.println(e.getMessage());")).addStatement(new ReturnStmt("null")));
         catchClauses.add(catchStmt);
 
         switch (callType) {
@@ -533,6 +539,8 @@ public class JavaGenerator {
 
                 if (returnType.contains("[]")) {
                     returnStmt = "Arrays.asList(" + returnStmt + ")";
+                } else if (oldMethod.getTypeAsString().contains("Optional")) {
+                    returnStmt = "Optional.of(" + returnStmt + ")";
                 }
 
                 tryStatement.addStatement(new ReturnStmt(returnStmt));
@@ -552,9 +560,12 @@ public class JavaGenerator {
 
                 returnStmt = "restTemplate.postForObject(" + url + ", request, " + returnType + ")";
 
-                /*if (returnType.contains("[]")) {
+                if (returnType.contains("[]")) {
                     returnStmt = "Arrays.asList(" + returnStmt + ")";
-                }*/ //Save puede devolver Arreglos?
+                } else if (oldMethod.getNameAsString().contains("Optional")) {
+                    returnStmt = "Optional.of(" + returnStmt + ")";
+                }
+                
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header1));
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header2));
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header3));
@@ -615,7 +626,7 @@ public class JavaGenerator {
             for (AnnotationExpr annotation : parameter.getAnnotations()) {
                 SingleMemberAnnotationExpr singleMembAnnot = (SingleMemberAnnotationExpr) annotation;
                 if (annotation.toString().contains("Param")) {
-                    string += singleMembAnnot.getMemberValue().toString() + "={" + parameter.getNameAsString() + "}&";
+                    string += singleMembAnnot.getMemberValue().toString().substring(1, singleMembAnnot.getMemberValue().toString().length()-1) + "={" + parameter.getNameAsString() + "}&";
                 }
             }
         }
@@ -634,6 +645,44 @@ public class JavaGenerator {
         }
 
         return returnType + ".class";
+    }
+
+    private void updateConstructorAutowired(ClassOrInterfaceDeclaration srcClass, String stubClassName) {
+        srcClass.getConstructors().forEach(constructor -> {
+            NodeList<Parameter> parameters = constructor.getParameters();
+            Parameter deleteParameter = null;
+            Statement deleteStmt = null;
+            Statement newStmt = null;
+            String variableName = "";
+            String operand1 = "";
+            BlockStmt body = null;
+            for (Parameter parameter : parameters) {                
+                if(parameter.getTypeAsString().equals(stubClassName)) {
+                    deleteParameter = parameter;
+                    break;
+                }
+            }
+            if(deleteParameter != null) {
+                variableName = deleteParameter.getNameAsString();
+                constructor.remove(deleteParameter);
+                body = constructor.getBody();
+                NodeList<Statement> statements = body.getStatements();                            
+                for (Statement statement : statements) {
+                    if(statement.toString().contains(variableName)) {
+                        deleteStmt = statement;
+                        break;
+                    }
+                }
+                
+                if(deleteStmt != null) {
+                    operand1 = deleteStmt.toString().split("=")[0];
+                    body.remove(deleteStmt);
+                    newStmt = StaticJavaParser.parseStatement(operand1 + " = new " + stubClassName + "();");
+                    body.addStatement(newStmt);
+                }
+            }
+            
+        });
     }
 
     private static class MethodNameCollector extends VoidVisitorAdapter<List<String>> {
