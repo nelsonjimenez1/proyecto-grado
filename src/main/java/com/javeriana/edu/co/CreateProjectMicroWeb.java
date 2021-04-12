@@ -160,7 +160,7 @@ public class CreateProjectMicroWeb {
 
         NodeList<CatchClause> catchClauses = new NodeList<>();
         CatchClause catchStmt = new CatchClause();
-        catchStmt.setParameter(new Parameter(new TypeParameter("Exception"), "e")).setBody(new BlockStmt().addStatement(StaticJavaParser.parseStatement("System.out.println(e.getMessage());")));
+        catchStmt.setParameter(new Parameter(new TypeParameter("Exception"), "e")).setBody(new BlockStmt().addStatement(StaticJavaParser.parseStatement("System.out.println(e.getMessage());")).addStatement(new ReturnStmt("null")));
         catchClauses.add(catchStmt);
 
         oldMethod.getAnnotations().forEach(annotation -> {

@@ -24,9 +24,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.apache.commons.io.FileUtils;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -115,7 +118,7 @@ public class CreateProjectMicroServices {
         String pathDirectory = String.join(fileSeparator, splitPathDirectory);
         File directory = new File(pathDirectory);
         directory.mkdir();
-        directory = new File(pathDirectory + fileSeparator + "register");
+        directory = new File(pathDirectory + fileSeparator + "registration");
         directory.mkdir();
     }
 
@@ -123,7 +126,7 @@ public class CreateProjectMicroServices {
         String[] splitPath = {System.getProperty("user.dir"), "templates", "pom.xml"};
         String path = String.join(fileSeparator, splitPath);
         Document dOutput = xmlU.openXMLFile(path);
-
+        addProperties(dOutput);
         addDependencies(dOutput);
         addPlugins(dOutput);
         updateGroupId_ArtifactID(dOutput);
@@ -239,7 +242,7 @@ public class CreateProjectMicroServices {
 
     private void generateFiles() {
         ArrayList<String> list = new ArrayList<String>();
-        String[] split = {"output", this.microName, "src", "main", "java", rootGroupID, "services", "register", "RegistrationServer.java"};
+        String[] split = {"output", this.microName, "src", "main", "java", rootGroupID, "services", "registration", "RegistrationServer.java"};
         String path = String.join(fileSeparator, split);
         list.add(System.getProperty("user.dir") + fileSeparator + path);
         this.createFiles(list);
@@ -377,4 +380,17 @@ public class CreateProjectMicroServices {
             System.out.println(ex.getMessage());
         }
     }   
+
+    private void addProperties(Document dOutput) {
+        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator + "pom.xml");
+        ArrayList<Node> nodes = xmlU.readXMLNodes(dInput, "/project/properties");
+        NodeList childNodes = nodes.get(0).getChildNodes();
+        List<Node> nodesArray = IntStream.range(0, childNodes.getLength())
+        .mapToObj(childNodes::item)
+        .collect(Collectors.toList());
+        
+        for (Node nodo : nodesArray) {
+            xmlU.insertNode(dOutput, "/project/properties", nodo);
+        }
+    }
 }

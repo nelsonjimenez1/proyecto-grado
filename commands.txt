@@ -1,0 +1,2 @@
+java -jar target/microservices-register-2.1.0.RELEASE.jar
+java -jar target/spring-petclinic-owner-2.1.0.RELEASE.jar

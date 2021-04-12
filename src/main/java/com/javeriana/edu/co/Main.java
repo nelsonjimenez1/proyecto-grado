@@ -20,7 +20,7 @@ import java.io.FileOutputStream;
 import java.util.Properties;
 import java.util.regex.*;
 
-public class Main {
+    public class Main {
     public static String fileSeparator = File.separator;
 
     public static void main(String[] args) throws Exception {
