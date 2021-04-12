@@ -36,11 +36,11 @@ import java.util.regex.*;
             Properties properties = new Properties();
             try {
                 File f = new File(System.getProperty("user.dir") + fileSeparator + "configuration.properties");
-                properties.load(new FileInputStream(f));
+                properties.load(new FileInputStream(f));                
+                //if(args[0] != null)                
+                    //properties.setProperty("INPUTPATH", args[0]);
                 properties.setProperty("INPUTPATH", borrame);
                 properties.store(new FileOutputStream(f), null);
-                //if(args[0] != null)                
-                //properties.setProperty("INPUTPATH", args[0]);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
