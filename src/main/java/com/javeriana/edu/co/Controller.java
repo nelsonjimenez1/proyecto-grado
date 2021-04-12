@@ -1,17 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.javeriana.edu.co;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- *
- * @author nelso
- */
+
 public class Controller {
     private Graph graph;
     private CreateProjectMicroRegister createProjectMicroRegister;
@@ -22,8 +15,8 @@ public class Controller {
         this.graph = new Graph();
         this.createProjectMicroRegister = new CreateProjectMicroRegister();
         this.hashMapMicroservice = new HashMap<>();
-        this.travelArrayMicroservice();
         this.hashMapPortMicroservice = new HashMap<>(); 
+        this.travelArrayMicroservice();        
         CreateProjectMicroWeb newMicroWeb = new CreateProjectMicroWeb(this.graph);
     }
     
@@ -32,7 +25,7 @@ public class Controller {
         int portGeneric = 3333;
         
         for (String microName : list) {
-            //hashMapPortMicroservice.put(microName, portGeneric);
+            hashMapPortMicroservice.put(microName, portGeneric);
             hashMapMicroservice.put(microName, new CreateProjectMicroServices(microName, graph,portGeneric));
             portGeneric++;
         }

@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.javeriana.edu.co;
 
-import static com.javeriana.edu.co.CreateProjectMicroServices.fileSeparator;
+import com.javeriana.edu.co.Utils.ExcelUtils;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,153 +16,34 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-/**
- *
- * @author PC
- */
 public class Graph {
 
     private HashMap<String, Vertex> nodes;
     private HashMap<String, ArrayList<Edge>> edges;
+    private ExcelUtils utils;
 
-    public Graph() { // Modified
+    public Graph() {
         this.nodes = new HashMap<>();
         this.edges = new HashMap<>();
-        loadNodes();
-        loadConnections();
+        this.utils = new ExcelUtils();
+
+        this.utils.loadNodes(nodes);
+        this.utils.loadConnections(edges);
 
     }
 
-    public void loadNodes() {
-        String[] split = {System.getProperty("user.dir"), "input", "graph.xlsx"};
-        String filename = String.join(fileSeparator, split);
-
-        try {
-            FileInputStream fis = new FileInputStream(filename);
-            XSSFWorkbook workBook = new XSSFWorkbook(fis);
-            XSSFSheet hssfsheetNodes = workBook.getSheetAt(0);
-            Iterator rowIterator = hssfsheetNodes.rowIterator();
-            int row = 1;
-
-            while (rowIterator.hasNext()) {
-
-                XSSFRow hssfRow = (XSSFRow) rowIterator.next();
-
-                if (row == 0) {
-                    row = 1;
-                    continue;
-                }
-
-                Iterator it = hssfRow.cellIterator();
-                Vertex node = new Vertex();
-
-                int cell = 0;
-
-                while (it.hasNext()) {
-                    XSSFCell hssfCell = (XSSFCell) it.next();
-
-                    switch (cell) {
-                        case 0:
-                            node.setId(hssfCell.toString());
-                            break;
-                        case 1:
-                            node.setPackageName(hssfCell.toString());
-                            break;
-                        case 2:
-                            node.setName(hssfCell.toString());
-                            break;
-                        case 3:
-                            node.setLabel(hssfCell.toString());
-                            break;
-                        case 4:
-                            node.setType(hssfCell.toString());
-                            break;
-                        case 5:
-                            node.setSubType(hssfCell.toString());
-                            break;
-                        case 6:
-                            node.setMicroservice(hssfCell.toString());
-                            break;
-                    }
-                    cell++;
-                }
-                this.nodes.put(node.getId(), node);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void loadConnections() {
-        String[] split = {System.getProperty("user.dir"), "input", "graph.xlsx"};
-        String filename = String.join(fileSeparator, split);
-
-        try {
-            FileInputStream fis = new FileInputStream(filename);
-            XSSFWorkbook workBook = new XSSFWorkbook(fis);
-            XSSFSheet hssfsheetNodes = workBook.getSheetAt(1);
-            Iterator rowIterator = hssfsheetNodes.rowIterator();
-            int row = 1;
-
-            while (rowIterator.hasNext()) {
-
-                XSSFRow hssfRow = (XSSFRow) rowIterator.next();
-
-                if (row == 0) {
-                    row = 1;
-                    continue;
-                }
-
-                Iterator it = hssfRow.cellIterator();
-                Edge edge = new Edge();
-
-                int cell = 0;
-
-                while (it.hasNext()) {
-                    XSSFCell hssfCell = (XSSFCell) it.next();
-
-                    switch (cell) {
-                        case 0:
-                            edge.setIdSrc(hssfCell.toString());
-                            break;
-                        case 1:
-                            edge.setIdDest(hssfCell.toString());
-                            break;
-                        case 2:
-                            edge.setTypeRelation(hssfCell.toString());
-                            break;
-                        case 3:
-                            edge.setLabel(hssfCell.toString());
-                            break;
-                    }
-                    cell++;
-                }
-                if (this.edges.get(edge.getIdSrc()) == null) {
-                    this.edges.put(edge.getIdSrc(), new ArrayList<>());
-                }
-                this.edges.get(edge.getIdSrc()).add(edge);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // New
     public ArrayList<Vertex> getAllNodes() {
         return new ArrayList<Vertex>(this.nodes.values());
     }
 
-    // New
     public Vertex getNodeByNodeId(String nodeId) {
         return this.nodes.get(nodeId);
     }
 
-    // New
     public ArrayList<Edge> getEdgesBySrcNodeId(String nodeId) {
         return this.edges.get(nodeId);
     }
 
-    // New
     public ArrayList<Edge> getEdgesSameMicroserviceBySrcNodeId(String nodeId, String microservice) {
 
         ArrayList<Edge> edges = new ArrayList<>();
@@ -179,7 +55,6 @@ public class Graph {
         return edges;
     }
 
-    // New
     public ArrayList<Vertex> getNodeMethodsBySrcNodeId(String nodeId) {
         ArrayList<Vertex> methods = new ArrayList<>();
         for (Edge edge : getEdgesBySrcNodeId(nodeId)) {
@@ -191,7 +66,6 @@ public class Graph {
         return methods;
     }
 
-    // New
     public ArrayList<Vertex> getNodeElementsSameMicroserviceBySrcNodeId(String type, String nodeId, String microservice) {
         ArrayList<Vertex> methods = new ArrayList<>();
         for (Edge edge : getEdgesSameMicroserviceBySrcNodeId(nodeId, microservice)) {
@@ -202,7 +76,6 @@ public class Graph {
         return methods;
     }
 
-    // Modificar
     public ArrayList<Vertex> getNodesByMicroservice(String microservice) {
         ArrayList<Vertex> result = new ArrayList<>();
 
@@ -216,21 +89,20 @@ public class Graph {
         return result;
     }
 
-    // New
     public ArrayList<Edge> getEdgesByDstNodeId(String nodeId) {
         ArrayList<Edge> result = new ArrayList<>();
 
         Collection<String> keys = this.nodes.keySet();
         for (String key : keys) {
             ArrayList<Edge> edgesAux = this.getEdgesBySrcNodeId(key);
-            if (edgesAux!= null) {
+            if (edgesAux != null) {
                 for (Edge edge : edgesAux) {
-                if (edge.getIdDest().equals(nodeId)) {
-                    result.add(edge);
+                    if (edge.getIdDest().equals(nodeId)) {
+                        result.add(edge);
+                    }
                 }
             }
-            }
-            
+
         }
 
         return result;
@@ -273,48 +145,46 @@ public class Graph {
         }
         return entities;
     }
-    public ArrayList<Vertex> getMethodsByClassId(String classId)
-    {   
+
+    public ArrayList<Vertex> getMethodsByClassId(String classId) {
         ArrayList<Vertex> methodByClass = new ArrayList<>();
-        if(getNodeByNodeId(classId).getType().equalsIgnoreCase("Class")){
-        
-            ArrayList<Edge> edges = getEdgesBySrcNodeId(classId); 
+        if (getNodeByNodeId(classId).getType().equalsIgnoreCase("Class")) {
+
+            ArrayList<Edge> edges = getEdgesBySrcNodeId(classId);
             Vertex aux;
             for (Edge edge : edges) {
-                if(edge.getTypeRelation().equalsIgnoreCase("Has method")){
+                if (edge.getTypeRelation().equalsIgnoreCase("Has method")) {
                     aux = getNodeByNodeId(edge.getIdDest());
-                    if(aux.getType().equalsIgnoreCase("Method")){
+                    if (aux.getType().equalsIgnoreCase("Method")) {
                         methodByClass.add(aux);
                     }
-                }            
+                }
             }
         }
-        return methodByClass; 
+        return methodByClass;
     }
-//     public List<Vertex> getFieldsByClassId(String classId)
-//    {
-//    }
+
     public ArrayList<Vertex> getMethodsByMethodId(String methodId) {
         ArrayList<Vertex> calls = new ArrayList<>();
-        if(getNodeByNodeId(methodId).getType().equalsIgnoreCase("Method")){
-        
-            ArrayList<Edge> edges = getEdgesBySrcNodeId(methodId); 
-            if(edges != null) {
+        if (getNodeByNodeId(methodId).getType().equalsIgnoreCase("Method")) {
+
+            ArrayList<Edge> edges = getEdgesBySrcNodeId(methodId);
+            if (edges != null) {
                 Vertex aux;
                 for (Edge edge : edges) {
-                    if(edge.getTypeRelation().equalsIgnoreCase("Calls")){
+                    if (edge.getTypeRelation().equalsIgnoreCase("Calls")) {
                         aux = getNodeByNodeId(edge.getIdDest());
-                        if(aux.getType().equalsIgnoreCase("Method")){
+                        if (aux.getType().equalsIgnoreCase("Method")) {
                             calls.add(aux);
                         }
-                    }            
+                    }
                 }
-            }            
-            
+            }
+
         }
-        return calls; 
+        return calls;
     }
-    
+
     public ArrayList<Vertex> getMethodsDistinctMicroservices(String methodId) {
         ArrayList<Vertex> calls = getMethodsByMethodId(methodId);
         ArrayList<Vertex> returns = new ArrayList<>();
@@ -324,23 +194,23 @@ public class Graph {
                 returns.add(vertex);
             }
         }
-        return returns; 
+        return returns;
     }
-    
+
     public Vertex getMainByMicroservice(String nameMicro) {
-        ArrayList<Vertex> list= getNodesByMicroservice(nameMicro);
+        ArrayList<Vertex> list = getNodesByMicroservice(nameMicro);
         for (Vertex vertex : list) {
             if (vertex.getSubType().equalsIgnoreCase("SpringBootApplication")) {
                 return vertex;
             }
-        }      
+        }
         return null;
     }
 
     public Vertex getParentByMethodId(String id) {
         ArrayList<Edge> edges = getEdgesByDstNodeId(id);
         for (Edge edge : edges) {
-            if(edge.getTypeRelation().equalsIgnoreCase("Has Method")){
+            if (edge.getTypeRelation().equalsIgnoreCase("Has Method")) {
                 return getNodeByNodeId(edge.getIdSrc());
             }
         }
@@ -349,47 +219,47 @@ public class Graph {
 
     ArrayList<Vertex> getFieldsByClassId(String classId) {
         ArrayList<Vertex> fieldsByClass = new ArrayList<>();
-        if(getNodeByNodeId(classId).getType().equalsIgnoreCase("Class")){
-        
-            ArrayList<Edge> edges = getEdgesBySrcNodeId(classId); 
-            if(edges != null) {
+        if (getNodeByNodeId(classId).getType().equalsIgnoreCase("Class")) {
+
+            ArrayList<Edge> edges = getEdgesBySrcNodeId(classId);
+            if (edges != null) {
                 Vertex aux;
                 for (Edge edge : edges) {
-                    if(edge.getTypeRelation().equalsIgnoreCase("Has field")){
+                    if (edge.getTypeRelation().equalsIgnoreCase("Has field")) {
                         aux = getNodeByNodeId(edge.getIdDest());
-                        if(aux.getType().equalsIgnoreCase("Field")){
+                        if (aux.getType().equalsIgnoreCase("Field")) {
                             fieldsByClass.add(aux);
                         }
-                    }            
+                    }
                 }
             }
-            
+
         }
-        return fieldsByClass; 
+        return fieldsByClass;
     }
-    
+
     boolean needExpose(String repositoryId) {
         boolean result = false;
         ArrayList<Edge> edges = getEdgesBySrcNodeId(repositoryId);
-        if(edges != null) {
+        if (edges != null) {
             for (Edge edge : edges) {
-                if(edge.getTypeRelation().equalsIgnoreCase("has method")) {
+                if (edge.getTypeRelation().equalsIgnoreCase("has method")) {
                     ArrayList<Edge> edgesMethod = getEdgesByDstNodeId(edge.getIdDest());
                     for (Edge edgeM : edgesMethod) {
-                        if(edgeM.getTypeRelation().equalsIgnoreCase("calls")) {
+                        if (edgeM.getTypeRelation().equalsIgnoreCase("calls")) {
                             Vertex src = getNodeByNodeId(edgeM.getIdSrc());
                             Vertex dst = getNodeByNodeId(edgeM.getIdDest());
-                            if(!src.getMicroservice().equals(dst.getMicroservice())) {
+                            if (!src.getMicroservice().equals(dst.getMicroservice())) {
                                 result = true;
                                 break;
                             }
-                        }                        
+                        }
                     }
-                    if(result) {
+                    if (result) {
                         break;
                     }
                 }
-                
+
             }
         }
         return result;

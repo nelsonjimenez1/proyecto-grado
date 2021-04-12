@@ -35,7 +35,7 @@ import java.util.regex.*;
 
             Properties properties = new Properties();
             try {
-                File f = new File(System.getProperty("user.dir") + fileSeparator + "configuracion.properties");
+                File f = new File(System.getProperty("user.dir") + fileSeparator + "configuration.properties");
                 properties.load(new FileInputStream(f));
                 properties.setProperty("INPUTPATH", borrame);
                 properties.store(new FileOutputStream(f), null);

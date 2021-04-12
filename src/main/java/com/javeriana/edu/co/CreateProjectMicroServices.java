@@ -1,13 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.javeriana.edu.co;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.google.common.io.Files;
+import com.javeriana.edu.co.Utils.FileUtilsProject;
 import com.javeriana.edu.co.Utils.XMLUtils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,7 +14,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -31,47 +26,46 @@ import org.w3c.dom.Node;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.NodeList;
 
-/**
- *
- * @author prado
- */
 public class CreateProjectMicroServices {
 
     public String groupID;
     public String rootInput;
     public String microName;
     public XMLUtils xmlU;
-    public JavaGenerator generator;
+    public JavaGeneratorMicroservices generator;
     public String rootGroupID;
-    public static String fileSeparator = File.separator;
     public Graph graph;
     public Integer port;
 
-    public CreateProjectMicroServices(String microName, Graph graph, int port) { // Modified
-        xmlU = new XMLUtils();
+    public CreateProjectMicroServices(String microName, Graph graph, int port) {
+        this.xmlU = new XMLUtils();
         Properties properties = new Properties();
         try {
-            File f = new File(System.getProperty("user.dir"), "configuracion.properties");
+            File f = new File(System.getProperty("user.dir"), "configuration.properties");
             properties.load(new FileInputStream(f));
-            groupID = properties.getProperty("GROUPID");
-            rootInput = properties.getProperty("INPUTPATH");
+            this.groupID = properties.getProperty("GROUPID");
+            this.rootInput = properties.getProperty("INPUTPATH");
             this.microName = microName;
             this.graph = graph;
-            this.generator = new JavaGenerator(rootInput, graph); // Modified
+            this.generator = new JavaGeneratorMicroservices(graph);
             this.port = port;
-            createBasicFolders();
-            createFolderGroupID();
-            createFolderAfterGroupID();
-            createPOM();
-            createResources();
-            copyAuxiliaryFolders();
-            generateFiles();
-            updateRegister();
-            copyJavaFiles();
-            createApplicationYML();
+            this.init();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+    
+    private void init () {
+        this.createBasicFolders();
+        this.createFolderGroupID();
+        this.createFolderAfterGroupID();
+        this.createPOM();
+        this.createResources();
+        this.copyAuxiliaryFolders();
+        this.generateFiles();
+        this.updateRegister();
+        this.copyJavaFiles();
+        this.createApplicationYML();
     }
 
     public void createBasicFolders() {
@@ -84,13 +78,13 @@ public class CreateProjectMicroServices {
 
         for (String c : folders) {
 
-            rout += fileSeparator + c;
+            rout += FileUtilsProject.FILE_SEPARATOR + c;
             File directory = new File(System.getProperty("user.dir"), "output" + rout);
             directory.mkdir();
         }
 
         for (String sc : subFolders) {
-            File directory = new File(System.getProperty("user.dir"), "output" + rout + fileSeparator + sc);
+            File directory = new File(System.getProperty("user.dir"), "output" + rout + FileUtilsProject.FILE_SEPARATOR + sc);
             directory.mkdir();
         }
     }
@@ -99,28 +93,27 @@ public class CreateProjectMicroServices {
 
         String[] split = groupID.split("\\.");
         String root = "";
-        //String path = String.join(fileSeparator, split);
 
         String[] splitPath = {System.getProperty("user.dir"), "output", this.microName, "src", "main", "java"};
-        String path = String.join(fileSeparator, splitPath);
+        String path = String.join(FileUtilsProject.FILE_SEPARATOR, splitPath);
         for (String s : split) {
-            root += fileSeparator + s;
+            root += FileUtilsProject.FILE_SEPARATOR + s;
             File directory = new File(path + root);
             directory.mkdir();
         }
 
         this.rootGroupID = root;
         String[] splitPathDirectory = {System.getProperty("user.dir"), "output", this.microName, "src", "main", "java", root, "services"};
-        String pathDirectory = String.join(fileSeparator, splitPathDirectory);
+        String pathDirectory = String.join(FileUtilsProject.FILE_SEPARATOR, splitPathDirectory);
         File directory = new File(pathDirectory);
         directory.mkdir();
-        directory = new File(pathDirectory + fileSeparator + "registration");
+        directory = new File(pathDirectory + FileUtilsProject.FILE_SEPARATOR + "registration");
         directory.mkdir();
     }
 
     public void createPOM() {
         String[] splitPath = {System.getProperty("user.dir"), "templates", "pom.xml"};
-        String path = String.join(fileSeparator, splitPath);
+        String path = String.join(FileUtilsProject.FILE_SEPARATOR, splitPath);
         Document dOutput = xmlU.openXMLFile(path);
         addProperties(dOutput);
         addDependencies(dOutput);
@@ -128,12 +121,12 @@ public class CreateProjectMicroServices {
         updateGroupId_ArtifactID(dOutput);
 
         String[] splitPathXml = {System.getProperty("user.dir"), "output", microName, "pom.xml"};
-        String pathXml = String.join(fileSeparator, splitPathXml);
+        String pathXml = String.join(FileUtilsProject.FILE_SEPARATOR, splitPathXml);
         xmlU.saveXML(dOutput, pathXml);
     }
 
     public void addDependencies(Document dOutput) {
-        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator + "pom.xml");
+        Document dInput = xmlU.openXMLFile(rootInput + FileUtilsProject.FILE_SEPARATOR + "pom.xml");
         ArrayList<Node> nodos = xmlU.readXMLNodes(dInput, "/project/dependencies/dependency");
 
         for (Node nodo : nodos) {
@@ -142,7 +135,7 @@ public class CreateProjectMicroServices {
     }
 
     public void addPlugins(Document dOutput) {
-        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator + "pom.xml");
+        Document dInput = xmlU.openXMLFile(rootInput + FileUtilsProject.FILE_SEPARATOR + "pom.xml");
         ArrayList<Node> nodos = xmlU.readXMLNodes(dInput, "/project/plugins/plugin");
 
         for (Node nodo : nodos) {
@@ -151,7 +144,7 @@ public class CreateProjectMicroServices {
     }
 
     private void updateGroupId_ArtifactID(Document dOutput) {
-        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator + "pom.xml");
+        Document dInput = xmlU.openXMLFile(rootInput + FileUtilsProject.FILE_SEPARATOR + "pom.xml");
         ArrayList<Node> nodoGroupId = xmlU.readXMLNodes(dInput, "/project/groupId");
         ArrayList<Node> nodoArtifactID = xmlU.readXMLNodes(dInput, "/project/artifactId");
         xmlU.removeNodes(dOutput, "/project/groupId");
@@ -163,9 +156,9 @@ public class CreateProjectMicroServices {
 
     private void createResources() {
         String[] splitOne = {rootInput, "src", "main", "resources"};
-        String pathOne = String.join(fileSeparator, splitOne);
+        String pathOne = String.join(FileUtilsProject.FILE_SEPARATOR, splitOne);
         String[] splitTwo = {System.getProperty("user.dir"), "output", microName, "src", "main"};
-        String pathTwo = String.join(fileSeparator, splitTwo);
+        String pathTwo = String.join(FileUtilsProject.FILE_SEPARATOR, splitTwo);
         copyAnotherDirectory(pathOne, pathTwo);
     }
 
@@ -192,14 +185,14 @@ public class CreateProjectMicroServices {
     }
 
     private void copyAuxiliaryFolders() {
-        ArrayList<File> list = listDirectory(rootInput + fileSeparator + "src" + fileSeparator + "main");
+        ArrayList<File> list = listDirectory(rootInput + FileUtilsProject.FILE_SEPARATOR + "src" + FileUtilsProject.FILE_SEPARATOR + "main");
         String[] split = {rootInput, "src", "main"};
-        String path = String.join(fileSeparator, split);
+        String path = String.join(FileUtilsProject.FILE_SEPARATOR, split);
         String[] splitMicro = {"output", microName, "src", "main"};
-        String pathMicro = String.join(fileSeparator, splitMicro);
+        String pathMicro = String.join(FileUtilsProject.FILE_SEPARATOR, splitMicro);
         for (int i = 0; i < list.size(); i++) {
             if (!list.get(i).getName().equals("resources") && !list.get(i).getName().equals("java")) {
-                copyAnotherDirectory(path + fileSeparator + list.get(i).getName(), System.getProperty("user.dir") + fileSeparator + pathMicro);
+                copyAnotherDirectory(path + FileUtilsProject.FILE_SEPARATOR + list.get(i).getName(), System.getProperty("user.dir") + FileUtilsProject.FILE_SEPARATOR + pathMicro);
             }
         }
     }
@@ -239,8 +232,8 @@ public class CreateProjectMicroServices {
     private void generateFiles() {
         ArrayList<String> list = new ArrayList<String>();
         String[] split = {"output", this.microName, "src", "main", "java", rootGroupID, "services", "registration", "RegistrationServer.java"};
-        String path = String.join(fileSeparator, split);
-        list.add(System.getProperty("user.dir") + fileSeparator + path);
+        String path = String.join(FileUtilsProject.FILE_SEPARATOR, split);
+        list.add(System.getProperty("user.dir") + FileUtilsProject.FILE_SEPARATOR + path);
         this.createFiles(list);
     }
 
@@ -250,33 +243,32 @@ public class CreateProjectMicroServices {
 
     private void createFolderAfterGroupID() {
         String[] splitPathDirectory = {this.rootInput, "src", "main", "java", this.rootGroupID};
-        String pathDirectory = String.join(fileSeparator, splitPathDirectory);
+        String pathDirectory = String.join(FileUtilsProject.FILE_SEPARATOR, splitPathDirectory);
         ArrayList<File> list = listDirectory(pathDirectory);
         String[] split = {"output", this.microName, "src", "main", "java", rootGroupID};
-        String path = String.join(fileSeparator, split);
+        String path = String.join(FileUtilsProject.FILE_SEPARATOR, split);
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).isDirectory()) {
-                String pathFolder = path + fileSeparator + list.get(i).getName();
+                String pathFolder = path + FileUtilsProject.FILE_SEPARATOR + list.get(i).getName();
                 File directory = new File(pathFolder);
                 directory.mkdir();
             }
         }
     }
 
-    //Validar caso 3
     private void copyJavaFiles() {
         ArrayList<Vertex> list = graph.getNodesByMicroservice(microName);
         Vertex main = graph.getMainByMicroservice(microName);
         String[] original = {this.rootInput, "src", "main", "java"};
         String[] originRight = main.getPackageName().split("\\.");
         original = concatV(original, originRight);
-        String originPath = String.join(fileSeparator, original) + fileSeparator + main.getName() + ".java";
+        String originPath = String.join(FileUtilsProject.FILE_SEPARATOR, original) + FileUtilsProject.FILE_SEPARATOR + main.getName() + ".java";
         String[] dest = {"output", this.microName, "src", "main", "java"};
         String[] destinyRight = main.getPackageName().split("\\.");
         dest = concatV(dest, destinyRight);
-        String destinyPath = String.join(fileSeparator, dest);
-        destinyPath += fileSeparator + main.getName() + ".java";
-        generator.modifyMain(originPath, destinyPath);
+        String destinyPath = String.join(FileUtilsProject.FILE_SEPARATOR, dest);
+        destinyPath += FileUtilsProject.FILE_SEPARATOR + main.getName() + ".java";
+        this.generator.modifyMain(originPath, destinyPath);
 
         for (Vertex vertex : list) {
             if (!vertex.getSubType().equals("SpringBootApplication")) {
@@ -284,26 +276,26 @@ public class CreateProjectMicroServices {
                     String[] origin = {this.rootInput, "src", "main", "java"};
                     originRight = vertex.getPackageName().split("\\.");
                     origin = concatV(origin, originRight);
-                    originPath = String.join(fileSeparator, origin) + fileSeparator + vertex.getName() + ".java";
+                    originPath = String.join(FileUtilsProject.FILE_SEPARATOR, origin) + FileUtilsProject.FILE_SEPARATOR + vertex.getName() + ".java";
                     String[] destiny = {"output", this.microName, "src", "main", "java"};
                     destinyRight = vertex.getPackageName().split("\\.");
                     destiny = concatV(destiny, destinyRight);
-                    destinyPath = String.join(fileSeparator, destiny);
+                    destinyPath = String.join(FileUtilsProject.FILE_SEPARATOR, destiny);
 
                     if (vertex.getSubType().equalsIgnoreCase("Controller") || vertex.getSubType().equalsIgnoreCase("Service")) {
                         try {
                             CompilationUnit newCuWebService = StaticJavaParser.parse(new File(originPath));
                             ArrayList<Vertex> methods = graph.getMethodsByClassId(vertex.getId());
                             ArrayList<Vertex> fields = graph.getFieldsByClassId(vertex.getId());
-                            this.generator.createClass(newCuWebService, vertex, methods, fields, destinyPath + fileSeparator + vertex.getName() + ".java");
+                            this.generator.createClass(newCuWebService, vertex, methods, fields, destinyPath + FileUtilsProject.FILE_SEPARATOR + vertex.getName() + ".java");
                         } catch (FileNotFoundException ex) {
                             System.out.println("File not found - CopyJavaFiles: " + ex.getMessage());
                             Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } else if (vertex.getSubType().equalsIgnoreCase("Repository")) {
                         if(graph.needExpose(vertex.getId())) {                            
-                            destinyPath += fileSeparator + vertex.getName() + ".java";
-                            generator.generateExposedRepository(vertex, originPath, destinyPath);
+                            destinyPath += FileUtilsProject.FILE_SEPARATOR + vertex.getName() + ".java";
+                            this.generator.generateExposedRepository(vertex, originPath, destinyPath);
                         } else {
                             copyFile(originPath, destinyPath);
                         }
@@ -328,11 +320,11 @@ public class CreateProjectMicroServices {
 
     private void createApplicationYML() {
         String[] splitPathDirectory = {"output", microName, "src", "main", "resources", "application.yml"};
-        String pathDirectory = String.join(fileSeparator, splitPathDirectory);
+        String pathDirectory = String.join(FileUtilsProject.FILE_SEPARATOR, splitPathDirectory);
         File newFile = new File(pathDirectory);
 
         String[] splitPathDirectoryOldFile = {"templates", "application.yml"};
-        String pathDirectoryOldFile = String.join(fileSeparator, splitPathDirectoryOldFile);
+        String pathDirectoryOldFile = String.join(FileUtilsProject.FILE_SEPARATOR, splitPathDirectoryOldFile);
         File oldFile = new File(pathDirectoryOldFile);
         try {
             if (oldFile.exists()) {
@@ -367,19 +359,8 @@ public class CreateProjectMicroServices {
         }
     }
 
-    private void deleteFile(File file) {
-        try {
-            if (file.exists()) {
-                file.delete();
-                System.out.println("File deleted");
-            }
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-    }   
-
     private void addProperties(Document dOutput) {
-        Document dInput = xmlU.openXMLFile(rootInput + fileSeparator + "pom.xml");
+        Document dInput = xmlU.openXMLFile(rootInput + FileUtilsProject.FILE_SEPARATOR + "pom.xml");
         ArrayList<Node> nodes = xmlU.readXMLNodes(dInput, "/project/properties");
         NodeList childNodes = nodes.get(0).getChildNodes();
         List<Node> nodesArray = IntStream.range(0, childNodes.getLength())
