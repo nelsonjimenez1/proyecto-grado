@@ -352,15 +352,18 @@ public class Graph {
         if(getNodeByNodeId(classId).getType().equalsIgnoreCase("Class")){
         
             ArrayList<Edge> edges = getEdgesBySrcNodeId(classId); 
-            Vertex aux;
-            for (Edge edge : edges) {
-                if(edge.getTypeRelation().equalsIgnoreCase("Has field")){
-                    aux = getNodeByNodeId(edge.getIdDest());
-                    if(aux.getType().equalsIgnoreCase("Field")){
-                        fieldsByClass.add(aux);
-                    }
-                }            
+            if(edges != null) {
+                Vertex aux;
+                for (Edge edge : edges) {
+                    if(edge.getTypeRelation().equalsIgnoreCase("Has field")){
+                        aux = getNodeByNodeId(edge.getIdDest());
+                        if(aux.getType().equalsIgnoreCase("Field")){
+                            fieldsByClass.add(aux);
+                        }
+                    }            
+                }
             }
+            
         }
         return fieldsByClass; 
     }

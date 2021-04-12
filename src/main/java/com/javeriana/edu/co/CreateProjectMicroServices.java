@@ -297,6 +297,7 @@ public class CreateProjectMicroServices {
                             ArrayList<Vertex> fields = graph.getFieldsByClassId(vertex.getId());
                             this.generator.createClass(newCuWebService, vertex, methods, fields, destinyPath + fileSeparator + vertex.getName() + ".java");
                         } catch (FileNotFoundException ex) {
+                            System.out.println("File not found - CopyJavaFiles: " + ex.getMessage());
                             Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } else if (vertex.getSubType().equalsIgnoreCase("Repository")) {
