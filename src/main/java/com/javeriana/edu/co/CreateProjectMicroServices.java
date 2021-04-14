@@ -50,6 +50,8 @@ public class CreateProjectMicroServices {
             this.generator = new JavaGeneratorMicroservices(graph);
             this.port = port;
             this.init();
+            DockerGenerator dockerG = new DockerGenerator();
+            dockerG.generateDockerFile(microName);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
