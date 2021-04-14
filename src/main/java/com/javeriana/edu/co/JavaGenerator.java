@@ -11,12 +11,12 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 public class JavaGenerator {
-    
+
     public String groupID;
-    public Graph graph;       
+    public Graph graph;
     public String rootInput;
     public FileUtilsProject fileUtilsProject;
-    
+
     public JavaGenerator(Graph graph) {
         this.graph = graph;
         Properties properties = new Properties();
@@ -24,7 +24,7 @@ public class JavaGenerator {
             File f = new File(System.getProperty("user.dir") + FileUtilsProject.FILE_SEPARATOR + "configuration.properties");
             properties.load(new FileInputStream(f));
             groupID = properties.getProperty("GROUPID");
-            rootInput = properties.getProperty("INPUTPATH");            
+            rootInput = properties.getProperty("INPUTPATH");
             this.fileUtilsProject = new FileUtilsProject();
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -67,21 +67,31 @@ public class JavaGenerator {
         }
         return string;
     }
-    
+
     public String getReturnTypeClass(MethodDeclaration method) {
 
         String returnType = method.getTypeAsString();
 
         if (returnType.contains("<") && returnType.contains(">")) { // TODO: Preguntar al profe: Collection<Collection<Entity>> ???
-            String returnTypeAux = returnType.split("<")[1].split(">")[0];
-            if(!returnType.contains("Optional"))
+            
+            String split[] = returnType.split("<");
+            String returnTypeAux = "";
+            if(split.length == 2) {
+                returnTypeAux = split[1].split(">")[0];
+            }
+            else if(split.length == 3) {
+                returnTypeAux = split[2].split(">")[0];
+            }
+
+            if (returnType.contains("Collection") || returnType.contains("List"))  {
                 returnTypeAux += "[]";
+            } 
             returnType = returnTypeAux;
         }
 
         return returnType + ".class";
     }
-    
+
     public String getStringGetParameters(MethodDeclaration method) {
         String string = "";
         for (Parameter parameter : method.getParameters()) {
