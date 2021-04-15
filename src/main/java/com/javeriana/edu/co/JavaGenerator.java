@@ -21,7 +21,7 @@ public class JavaGenerator {
         this.graph = graph;
         Properties properties = new Properties();
         try {
-            File f = new File(System.getProperty("user.dir") + FileUtilsProject.FILE_SEPARATOR + "configuration.properties");
+            File f = new File(System.getProperty("user.dir") + File.separator + "configuration.properties");
             properties.load(new FileInputStream(f));
             groupID = properties.getProperty("GROUPID");
             rootInput = properties.getProperty("INPUTPATH");
@@ -72,7 +72,7 @@ public class JavaGenerator {
 
         String returnType = method.getTypeAsString();
 
-        if (returnType.contains("<") && returnType.contains(">")) { // TODO: Preguntar al profe: Collection<Collection<Entity>> ???
+        if (returnType.contains("<") && returnType.contains(">")) { 
             
             String split[] = returnType.split("<");
             String returnTypeAux = "";

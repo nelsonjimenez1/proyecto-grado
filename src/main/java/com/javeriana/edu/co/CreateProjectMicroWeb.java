@@ -2,6 +2,7 @@
 package com.javeriana.edu.co;
 
 import com.javeriana.edu.co.Utils.FileUtilsProject;
+import java.io.File;
 
 
 public class CreateProjectMicroWeb {
@@ -22,9 +23,9 @@ public class CreateProjectMicroWeb {
 
     private void copyFolder() {
         String[] split = {System.getProperty("user.dir"), "templates", "microservices-web"};
-        String path = String.join(FileUtilsProject.FILE_SEPARATOR, split);
+        String path = String.join(File.separator, split);
         String[] splitMicro = {System.getProperty("user.dir"), "output"};
-        String pathMicro = String.join(FileUtilsProject.FILE_SEPARATOR, splitMicro);
+        String pathMicro = String.join(File.separator, splitMicro);
         this.utils.copyAnotherDirectory(path, pathMicro);
     }
     

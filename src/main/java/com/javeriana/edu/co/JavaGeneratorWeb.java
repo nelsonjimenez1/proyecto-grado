@@ -49,7 +49,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
     public void generateServices() {
         HashMap<String, ArrayList<Vertex>> controllers = graph.getControllers();
         String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
-        String pathGeneric = String.join(FileUtilsProject.FILE_SEPARATOR, split) + FileUtilsProject.FILE_SEPARATOR;
+        String pathGeneric = String.join(File.separator, split) + File.separator;
         String pathComplete = pathGeneric + "WebService.java";
 
         for (String nameMicroService : controllers.keySet()) {
@@ -80,7 +80,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
 
                 String[] split = {"output", controller.getMicroservice(), "src", "main", "java"};
                 String[] pathNew = concatV(split, packageController);
-                String pathGeneric = String.join(FileUtilsProject.FILE_SEPARATOR, pathNew) + FileUtilsProject.FILE_SEPARATOR + controller.getName() + ".java";
+                String pathGeneric = String.join(File.separator, pathNew) + File.separator + controller.getName() + ".java";
                 CompilationUnit cuController = StaticJavaParser.parse(new File(pathGeneric));
                 System.out.println("Metodos" + controller.getName());
                 cuController.findAll(MethodDeclaration.class).forEach(oldMethod -> {
@@ -282,7 +282,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
     public void generateControllers() {
         HashMap<String, ArrayList<Vertex>> controllers = graph.getControllers();
         String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
-        String pathGeneric = String.join(FileUtilsProject.FILE_SEPARATOR, split) + FileUtilsProject.FILE_SEPARATOR;
+        String pathGeneric = String.join(File.separator, split) + File.separator;
         String pathComplete = pathGeneric + "WebController.java";
 
         for (String nameMicroService : controllers.keySet()) {
@@ -320,7 +320,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
 
                 String[] split = {"output", controller.getMicroservice(), "src", "main", "java"};
                 String[] pathNew = concatV(split, packageController);
-                String pathGeneric = String.join(FileUtilsProject.FILE_SEPARATOR, pathNew) + FileUtilsProject.FILE_SEPARATOR + controller.getName() + ".java";
+                String pathGeneric = String.join(File.separator, pathNew) + File.separator + controller.getName() + ".java";
                 CompilationUnit cuController = StaticJavaParser.parse(new File(pathGeneric));
                 System.out.println("Metodos" + controller.getName());
                 cuController.findAll(MethodDeclaration.class).forEach(oldMethod -> {
@@ -402,7 +402,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
     private void modifyWebServer(String nameMicroService){
         String serviceURL = "SERVICE_URL"; 
         String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
-        String pathGeneric = String.join(FileUtilsProject.FILE_SEPARATOR, split) + FileUtilsProject.FILE_SEPARATOR;
+        String pathGeneric = String.join(File.separator, split) + File.separator;
         String pathComplete = pathGeneric + "WebServer.java";
         String url = nameMicroService.toUpperCase() + "_" + serviceURL;
         String nameMethodService = nameMicroService+"Service";
@@ -446,7 +446,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
     
     private void deleteOldMethodsWebServer(){
         String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
-        String pathGeneric = String.join(FileUtilsProject.FILE_SEPARATOR, split) + FileUtilsProject.FILE_SEPARATOR;
+        String pathGeneric = String.join(File.separator, split) + File.separator;
         String pathComplete = pathGeneric + "WebServer.java";
         try {
             CompilationUnit cuWebServer = StaticJavaParser.parse(new File(pathComplete));
@@ -463,7 +463,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
     
     private void deleteOldTemplates(){
         String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
-        String pathGeneric = String.join(FileUtilsProject.FILE_SEPARATOR, split) + FileUtilsProject.FILE_SEPARATOR;
+        String pathGeneric = String.join(File.separator, split) + File.separator;
         String pathController = pathGeneric + "WebController.java";
         String pathService = pathGeneric + "WebService.java";
         File file = new File(pathController);
@@ -485,10 +485,10 @@ public class JavaGeneratorWeb extends JavaGenerator{
                 String[] split2 = groupID.split("\\.");
                 String root = "";
                 for (String s : split2) {
-                    root += FileUtilsProject.FILE_SEPARATOR + s;
+                    root += File.separator + s;
                 }
                 String[] rootInput = {properties.getProperty("INPUTPATH"), "src", "main", "java", root, name + ".java"};
-                String path = String.join(FileUtilsProject.FILE_SEPARATOR, rootInput);
+                String path = String.join(File.separator, rootInput);
                 CompilationUnit cuEntity = StaticJavaParser.parse(new File(path));
                 cuEntity.setPackageDeclaration(groupIdWeb); 
                 NodeList<Node> importsRemove = new NodeList<>();
@@ -500,7 +500,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
                     cuEntity.remove(imp);
                 });
                 String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web", name+".java"};
-                String pathGeneric = String.join(FileUtilsProject.FILE_SEPARATOR, split) + FileUtilsProject.FILE_SEPARATOR;
+                String pathGeneric = String.join(File.separator, split) + File.separator;
                 this.fileUtilsProject.saveCompilationUnit(cuEntity, pathGeneric);
             }
         } catch (FileNotFoundException ex) {

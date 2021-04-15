@@ -2,6 +2,7 @@ package com.javeriana.edu.co.Utils;
 
 import com.javeriana.edu.co.Edge;
 import com.javeriana.edu.co.Vertex;
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,14 +16,14 @@ public class ExcelUtils {
 
     public void loadNodes(HashMap<String, Vertex> nodes) {
         String[] split = {System.getProperty("user.dir"), "input", "graph.xlsx"};
-        String filename = String.join(FileUtilsProject.FILE_SEPARATOR, split);
+        String filename = String.join(File.separator, split);
 
         try {
             FileInputStream fis = new FileInputStream(filename);
             XSSFWorkbook workBook = new XSSFWorkbook(fis);
             XSSFSheet hssfsheetNodes = workBook.getSheetAt(0);
             Iterator rowIterator = hssfsheetNodes.rowIterator();
-            int row = 1;
+            int row = 0;
 
             while (rowIterator.hasNext()) {
 
@@ -75,14 +76,14 @@ public class ExcelUtils {
 
     public void loadConnections(HashMap<String, ArrayList<Edge>> edges) {
         String[] split = {System.getProperty("user.dir"), "input", "graph.xlsx"};
-        String filename = String.join(FileUtilsProject.FILE_SEPARATOR, split);
+        String filename = String.join(File.separator, split);
 
         try {
             FileInputStream fis = new FileInputStream(filename);
             XSSFWorkbook workBook = new XSSFWorkbook(fis);
             XSSFSheet hssfsheetNodes = workBook.getSheetAt(1);
             Iterator rowIterator = hssfsheetNodes.rowIterator();
-            int row = 1;
+            int row = 0;
 
             while (rowIterator.hasNext()) {
 

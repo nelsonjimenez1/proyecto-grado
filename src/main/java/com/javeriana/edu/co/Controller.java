@@ -1,6 +1,6 @@
 package com.javeriana.edu.co;
 
-import com.javeriana.edu.co.Utils.CmdUtils;
+import com.javeriana.edu.co.Utils.ConsoleUtils;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -12,13 +12,13 @@ public class Controller {
     private CreateProjectMicroRegister createProjectMicroRegister;
     private HashMap<String, CreateProjectMicroServices> hashMapMicroservice;
     private HashMap<String, Integer> hashMapPortMicroservice;
-    private CmdUtils cmdUtils;
+    private ConsoleUtils cmdUtils;
     private DockerGenerator dockerG;
     private String registerIP;
 
     public Controller() {
         this.dockerG = new DockerGenerator();
-        this.cmdUtils = new CmdUtils();
+        this.cmdUtils = new ConsoleUtils();
         this.graph = new Graph();
         this.createProjectMicroRegister = new CreateProjectMicroRegister();
         this.cmdUtils.executeCommand("microservices-register", "docker network create microservices-net");

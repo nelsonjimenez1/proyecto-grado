@@ -14,7 +14,7 @@ import java.io.InputStreamReader;
  *
  * @author prado
  */
-public class CmdUtils {
+public class ConsoleUtils {
 
     public void doMvnPackage(String name) {
         executeCommand(name, "mvn package");
@@ -22,11 +22,19 @@ public class CmdUtils {
 
     public void executeCommand(String name, String command) {
         try {
-            // TODO: Diferenciar windows o linux
+            
+            String osName = System.getProperty("os.name");
+            String console = "";
+            
+            if(osName.contains("windows"))
+            {
+                
+            }
+            
             String commandMvn = "cmd /c " + command;
 
             System.out.println("---------------------------------------------------");
-            System.out.println("Executing command: \"" + command + "\" in: \"output/" + name + "\"");
+            System.out.println("Executing command: \"" + command + "\" in: \"output" + File.separator + name + "\"");
             System.out.println("---------------------------------------------------");
             Process p = Runtime.getRuntime().exec(commandMvn, null, new File("output", name));
             printResults(p);

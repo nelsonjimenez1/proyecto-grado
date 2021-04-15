@@ -41,11 +41,11 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         try {
             String[] splitRegistrationServer = {"templates", "RegistrationServer.java"};
             String[] splitRegistrationServerWrite = {"output", nameMicroService, "src", "main", "java", rooteGroupID, "services", "registration", "RegistrationServer.java"};
-            String path = String.join(FileUtilsProject.FILE_SEPARATOR, splitRegistrationServer);
-            String pathWriteFile = String.join(FileUtilsProject.FILE_SEPARATOR, splitRegistrationServerWrite);
+            String path = String.join(File.separator, splitRegistrationServer);
+            String pathWriteFile = String.join(File.separator, splitRegistrationServerWrite);
             CompilationUnit cu = StaticJavaParser.parse(new File(System.getProperty("user.dir"), path));
             cu.setPackageDeclaration(this.groupID + ".services.registration");
-            this.fileUtilsProject.saveCompilationUnit(cu, System.getProperty("user.dir") + FileUtilsProject.FILE_SEPARATOR + pathWriteFile);  
+            this.fileUtilsProject.saveCompilationUnit(cu, System.getProperty("user.dir") + File.separator + pathWriteFile);  
         } catch (IOException ex) {
             Logger.getLogger(JavaGeneratorWeb.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ex.getMessage());
@@ -121,7 +121,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
 
                     }
                     addMethodsToClass(declaration, aux, methods);
-                    System.out.println("Ruta " + rootDest);
+                    System.out.println("Path " + rootDest);
                     this.fileUtilsProject.saveCompilationUnit(newCu, rootDest);
                 }
             });
@@ -330,11 +330,11 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
                 String[] origin = {this.rootInput, "src", "main", "java"};
                 String[] originRight = methodVertex.getPackageName().split("\\.");
                 origin = concatV(origin, originRight);
-                String originPath = String.join(FileUtilsProject.FILE_SEPARATOR, origin) + FileUtilsProject.FILE_SEPARATOR + parent.getName() + ".java";
+                String originPath = String.join(File.separator, origin) + File.separator + parent.getName() + ".java";
                 String[] dest = {"output", vertexDestMicro.getMicroservice(), "src", "main", "java"};
                 String[] destinyRight = parent.getPackageName().split("\\.");
                 dest = concatV(dest, destinyRight);
-                String destinyPath = String.join(FileUtilsProject.FILE_SEPARATOR, dest) + FileUtilsProject.FILE_SEPARATOR + parent.getName() + ".java";
+                String destinyPath = String.join(File.separator, dest) + File.separator + parent.getName() + ".java";
 
                 try {
 

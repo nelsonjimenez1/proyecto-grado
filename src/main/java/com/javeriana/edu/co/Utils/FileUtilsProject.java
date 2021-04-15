@@ -17,9 +17,7 @@ import java.util.logging.Logger;
  *
  * @author prado
  */
-public class FileUtilsProject {
-    
-    public static final String FILE_SEPARATOR = File.separator;
+public class FileUtilsProject {       
     
     public void copyAnotherDirectory(String origin, String destiny) {
         File from = new File(origin);

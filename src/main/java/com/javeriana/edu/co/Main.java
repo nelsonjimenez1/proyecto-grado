@@ -20,22 +20,21 @@ import java.io.FileOutputStream;
 import java.util.Properties;
 import java.util.regex.*;
 
-    public class Main {
-    public static String fileSeparator = File.separator;
+public class Main {
 
     public static void main(String[] args) throws Exception {
 
         //cambiar ruta
-        String borrame = "C:\\Users\\nelso\\Documents\\TG\\spring-petclinic-master"; //Nelson
+        //String borrame = "C:\\Users\\nelso\\Documents\\TG\\spring-petclinic-master"; //Nelson
         //String borrame = "C:\\\\Users\\\\PC\\\\Desktop\\\\spring-petclinic-master"; //Santos
         //String borrame = "C:\\Tools\\spring-petclinic-master"; //Gustavo
-        //String borrame = "C:\\Users\\prado\\OneDrive\\Documentos\\TG\\spring-petclinic-master"; //Sebastián
+        String borrame = "C:\\Users\\prado\\OneDrive\\Documentos\\TG\\spring-petclinic-master"; //Sebastián
 
         if (/*args.length > 0*/true) {
 
             Properties properties = new Properties();
             try {
-                File f = new File(System.getProperty("user.dir") + fileSeparator + "configuration.properties");
+                File f = new File(System.getProperty("user.dir") + File.separator + "configuration.properties");
                 properties.load(new FileInputStream(f));                
                 //if(args[0] != null)                
                     //properties.setProperty("INPUTPATH", args[0]);

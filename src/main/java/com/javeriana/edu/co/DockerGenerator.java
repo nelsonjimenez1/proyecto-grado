@@ -1,14 +1,9 @@
 package com.javeriana.edu.co;
 
-import com.javeriana.edu.co.Utils.FileUtilsProject;
 import com.javeriana.edu.co.Utils.XMLUtils;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,7 +24,7 @@ import org.w3c.dom.Node;
  */
 public class DockerGenerator {
     public static int lineJump = 4; 
-    public static String image ="openjdk:8-jre";
+    public static String image ="openjdk:8-alpine";
     
     public XMLUtils xmlU;
     
@@ -40,7 +35,7 @@ public class DockerGenerator {
     public void generateDockerFile(String microName, int port){
         String[] split = {"output", microName, "Dockerfile"};
         List<String> lines = new ArrayList<>(); 
-        String pathGeneric = String.join(FileUtilsProject.FILE_SEPARATOR, split);
+        String pathGeneric = String.join(File.separator, split);
         File file = new File(pathGeneric); 
         String from = "FROM " + image; 
         String add = "ADD " + "target"+ "/"  +getADDText(microName) + " "+ "app.jar"; 
@@ -70,7 +65,7 @@ public class DockerGenerator {
         }
     }
     public String getADDText(String microName){
-        Document d = xmlU.openXMLFile(System.getProperty("user.dir") +FileUtilsProject.FILE_SEPARATOR+"output"+FileUtilsProject.FILE_SEPARATOR + microName + FileUtilsProject.FILE_SEPARATOR+ "pom.xml");
+        Document d = xmlU.openXMLFile(System.getProperty("user.dir") + File.separator +"output"+ File.separator + microName + File.separator + "pom.xml");
         ArrayList<Node> nodoVersion = xmlU.readXMLNodes(d, "/project/version");
         ArrayList<Node> nodoArtifactID = xmlU.readXMLNodes(d, "/project/artifactId");
         ArrayList<Node> nodoPackaging = xmlU.readXMLNodes(d,"/project/packaging");
