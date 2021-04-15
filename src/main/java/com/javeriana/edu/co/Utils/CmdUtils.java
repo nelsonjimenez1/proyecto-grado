@@ -14,12 +14,12 @@ import java.io.InputStreamReader;
  *
  * @author prado
  */
-public class CmdUtils {        
-    
+public class CmdUtils {
+
     public void doMvnPackage(String name) {
         executeCommand(name, "mvn package");
     }
-    
+
     public void executeCommand(String name, String command) {
         try {
             // TODO: Diferenciar windows o linux
@@ -35,13 +35,30 @@ public class CmdUtils {
             ex.printStackTrace();
         }
     }
-    
+
     public void printResults(Process process) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    String line = "";
-    while ((line = reader.readLine()) != null) {
-        System.out.println(line);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line = "";
+        while ((line = reader.readLine()) != null) {
+            System.out.println(line);
+        }
     }
-}
-    
+
+    public String getRegisterIP() {
+        try {
+            // TODO: Diferenciar windows o linux
+            String commandMvn = "cmd /c " + "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' register";
+            Process p = Runtime.getRuntime().exec(commandMvn, null, new File("output", "microservices-register"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line = "";
+            if ((line = reader.readLine()) != null) {
+                return line;
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
 }
