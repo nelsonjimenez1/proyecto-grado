@@ -2,6 +2,7 @@ package com.javeriana.edu.co;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -28,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,13 +47,13 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
             String pathWriteFile = String.join(File.separator, splitRegistrationServerWrite);
             CompilationUnit cu = StaticJavaParser.parse(new File(System.getProperty("user.dir"), path));
             cu.setPackageDeclaration(this.groupID + ".services.registration");
-            this.fileUtilsProject.saveCompilationUnit(cu, System.getProperty("user.dir") + File.separator + pathWriteFile);  
+            this.fileUtilsProject.saveCompilationUnit(cu, System.getProperty("user.dir") + File.separator + pathWriteFile);
         } catch (IOException ex) {
             Logger.getLogger(JavaGeneratorWeb.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ex.getMessage());
         }
     }
-    
+
     void modifyMain(String originPath, String destinyPath) {
         try {
             CompilationUnit cuMain = StaticJavaParser.parse(new File(originPath));
@@ -97,7 +99,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         }
 
     }
-    
+
     public void createClass(CompilationUnit originalCu, Vertex classNode, ArrayList<Vertex> methods, ArrayList<Vertex> fields, String rootDest) {
         try {
             System.out.println("createClass");
@@ -111,17 +113,25 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
                     ClassOrInterfaceDeclaration aux = newCu.addClass(declaration.getName().toString(), getKeywords(declaration.getModifiers()));
                     addComplemets(declaration, aux);
                     addAnnotations(declaration, aux);
-                    if (fields.size() == 0) {
-                        addFieldsToClass(declaration, aux);
-                        addConstructors(declaration, aux);
+                    if (!classNode.getSubType().equalsIgnoreCase("Repository")) {
+                        if (fields.isEmpty()) {
+                            addFieldsToClass(declaration, aux);
+                            addConstructors(declaration, aux);
+                        } else {
+                            addFieldsToClass(declaration, aux, fields);
+                            addConstructors(declaration, aux, fields);
+                        }
 
                     } else {
-                        addFieldsToClass(declaration, aux, fields);
-                        addConstructors(declaration, aux, fields);
-
+                        aux.setInterface(true);
                     }
-                    addMethodsToClass(declaration, aux, methods);
-                    System.out.println("Path " + rootDest);
+
+                    if (methods.isEmpty()) {
+                        addMethodsToClass(declaration, aux, classNode);
+                    } else {
+                        addMethodsToClass(declaration, aux, methods, classNode);
+                    }
+
                     this.fileUtilsProject.saveCompilationUnit(newCu, rootDest);
                 }
             });
@@ -131,7 +141,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         }
     }
 
-    public void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {        
+    public void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
         originalClass.getConstructors().forEach(constructor -> {
             ConstructorDeclaration newConstructor = newClass.addConstructor(getKeywords(constructor.getModifiers()));
             newConstructor.setParameters(constructor.getParameters());
@@ -144,7 +154,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
     }
 
     public void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> fieldsNodes) {
-      
+
         originalClass.getConstructors().forEach(constructor -> {
             ConstructorDeclaration newConstructor = newClass.addConstructor(getKeywords(constructor.getModifiers()));
             constructor.getParameters().forEach(parameter -> {
@@ -185,13 +195,31 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         newClass.setExtendedTypes(originalClass.getExtendedTypes());
         newClass.setImplementedTypes(originalClass.getImplementedTypes());
     }
-    
 
-    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> methods) {
-        System.out.println("methods");
+    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Vertex classNode) {
         originalClass.findAll(MethodDeclaration.class).forEach(method -> {
 
-            System.out.println("MethodDeclaration name: " + method.getDeclarationAsString());
+            MethodDeclaration aux = newClass.addMethod(method.getName().toString(), getKeywords(method.getModifiers()));
+            aux.setType(method.getType());
+            aux.setThrownExceptions(method.getThrownExceptions());
+            method.getParameters().forEach(parameter -> aux.addParameter(parameter));
+
+            aux.setAnnotations(method.getAnnotations());
+            if (method.getComment().isPresent()) {
+                aux.setComment(method.getComment().get());
+            }
+
+            if (!classNode.getSubType().equalsIgnoreCase("Repository")) {
+                aux.setBody(method.getBody().get());
+            } else {
+                aux.setBody(null);
+            }
+        });
+    }
+
+    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> methods, Vertex classNode) {
+        originalClass.findAll(MethodDeclaration.class).forEach(method -> {
+
             String idVertex = methodValidate(methods, method);
             if (idVertex != null) {
                 MethodDeclaration aux = newClass.addMethod(method.getName().toString(), getKeywords(method.getModifiers()));
@@ -207,9 +235,14 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
                 ArrayList<Vertex> methodsDistinct = graph.getMethodsDistinctMicroservices(idVertex);
 
                 if (!methodsDistinct.isEmpty()) {
-                    createRepositoryStubClass(methodsDistinct, idVertex, newClass);                    
+                    createRepositoryStubClass(methodsDistinct, idVertex, newClass);
                 }
-                aux.setBody(method.getBody().get());
+
+                if (!classNode.getSubType().equalsIgnoreCase("Repository")) {
+                    aux.setBody(method.getBody().get());
+                } else {
+                   aux.setBody(null);
+                }
             }
         });
     }
@@ -236,14 +269,14 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
     private void addFieldsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
         System.out.println("fields");
         originalClass.findAll(FieldDeclaration.class).forEach(field -> {
-            
+
             FieldDeclaration aux;
             if (field.getVariable(0).getInitializer().isPresent()) {
                 aux = newClass.addFieldWithInitializer(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), field.getVariable(0).getInitializer().get(), getKeywords(field.getModifiers()));
             } else {
                 aux = newClass.addField(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), getKeywords(field.getModifiers()));
             }
-            
+
             aux.setAnnotations(field.getAnnotations());
 
             if (field.getComment().isPresent()) {
@@ -265,7 +298,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         }
         return result;
     }
-    
+
     private String methodValidate(ArrayList<Vertex> methods, MethodDeclaration method) {
         String[] splitSignature;
         String[] splitVertex;
@@ -325,7 +358,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         Vertex vertexDestMicro = graph.getNodeByNodeId(idVertexDestMicro);
         for (Vertex methodVertex : methodVertices) {
             Vertex parent = graph.getParentByMethodId(methodVertex.getId());
-            if (!createdParents.contains(parent)) {
+            if (!createdParents.contains(parent) && parent != null) {
 
                 String[] origin = {this.rootInput, "src", "main", "java"};
                 String[] originRight = methodVertex.getPackageName().split("\\.");
@@ -345,14 +378,14 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
                     cuDestiny.addImport("org.springframework.cloud.client.loadbalancer.LoadBalanced");
                     cuDestiny.addImport("org.springframework.beans.factory.annotation.Autowired");
                     cuDestiny.addImport("org.springframework.stereotype.Component");
-                    
+
                     cuParent.getImports().forEach(imp -> {
                         cuDestiny.addImport(imp);
                     });
-                    
+
                     ClassOrInterfaceDeclaration classParent = cuParent.findAll(ClassOrInterfaceDeclaration.class).get(0);
                     ClassOrInterfaceDeclaration classDestiny = cuDestiny.addClass(classParent.getNameAsString());
-                    
+
                     classDestiny.addAnnotation(new MarkerAnnotationExpr("Component"));
 
                     NodeList<Modifier> modifiers = new NodeList<>();
@@ -448,7 +481,6 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
 
                 url = "URL + \"/interface\"";
                 returnType = getReturnTypeClass(oldMethod);
-                //parameters = getStringGetParameters(oldMethod); Save con parametros además del objeto?
                 String postParameter = getPostParameter(oldMethod);
                 String postParameterType = getPostParameterType(oldMethod);
 
@@ -463,7 +495,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
                 } else if (oldMethod.getNameAsString().contains("Optional")) {
                     returnStmt = "Optional.of(" + returnStmt + ")";
                 }
-                
+
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header1));
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header2));
                 tryStatement.addStatement(StaticJavaParser.parseStatement(header3));
@@ -472,8 +504,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
 
             case "DELETE":
 
-                url = "URL + \"/interface" + getStringUrlParameters(oldMethod) + "\"";
-                ;
+                url = "URL + \"/interface" + getStringUrlParameters(oldMethod) + "\"";               
                 parameters = getStringGetParameters(oldMethod);
 
                 returnStmt = "restTemplate.delete(" + url + parameters + ")";
@@ -494,7 +525,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
             for (AnnotationExpr annotation : parameter.getAnnotations()) {
                 SingleMemberAnnotationExpr singleMembAnnot = (SingleMemberAnnotationExpr) annotation;
                 if (annotation.toString().contains("Param")) {
-                    string += singleMembAnnot.getMemberValue().toString().substring(1, singleMembAnnot.getMemberValue().toString().length()-1) + "={" + parameter.getNameAsString() + "}&";
+                    string += singleMembAnnot.getMemberValue().toString().substring(1, singleMembAnnot.getMemberValue().toString().length() - 1) + "={" + parameter.getNameAsString() + "}&";
                 }
             }
         }
@@ -544,23 +575,78 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         return result;
     }
 
-    public void generateExposedRepository(Vertex vertex, String srcPath, String dstPath) {
+    public String generateExposedRepository(Vertex vertex, String srcPath, String dstPath) {
+
+        String exposedClass = "";
+        String result = "";
         try {
             CompilationUnit cuRepo = StaticJavaParser.parse(new File(srcPath));
             String import1 = "org.springframework.data.rest.core.annotation.RepositoryRestResource";
             String annotation = "RepositoryRestResource";
             cuRepo.addImport(import1);
-            cuRepo.findAll(ClassOrInterfaceDeclaration.class).forEach(cd -> {
+            List<ClassOrInterfaceDeclaration> classes = cuRepo.findAll(ClassOrInterfaceDeclaration.class);
+
+            for (ClassOrInterfaceDeclaration cd : classes) {
                 if (cd.getNameAsString().equals(vertex.getName())) {
                     NodeList<MemberValuePair> aux = new NodeList<>();
                     aux.add(new MemberValuePair("path", StaticJavaParser.parseExpression("\"interface\"")));
                     cd.addAnnotation(new NormalAnnotationExpr(new Name(annotation), aux));
+
+                    exposedClass = cd.getExtendedTypes().toString().split("<")[1].split(",")[0];
                 }
-            });
+            }
+
+            NodeList<ImportDeclaration> imports = cuRepo.getImports();
+            for (ImportDeclaration aImport : imports) {
+                if (aImport.getNameAsString().contains(exposedClass)) {
+                    result = aImport.getNameAsString();
+                }
+            }
+
+            if (result.equals("")) {
+                result = vertex.getPackageName() + "." + exposedClass;
+            }
+
             this.fileUtilsProject.saveCompilationUnit(cuRepo, dstPath);
 
         } catch (Exception ex) {
             System.out.println("ERROR: " + ex.getMessage());
+        }
+
+        return result;
+    }
+
+    public void generateExposedConfiguration(Set<String> imports, String microName) {
+
+        if (!imports.isEmpty()) {
+
+            String[] splitTemplate = {"templates", "RestConfig.java"};
+            String path = String.join(File.separator, splitTemplate);
+
+            String groupIdFS = String.join(File.separator, this.groupID.split("\\."));
+            String[] splitDst = {"output", microName, "src", "main", "java", groupIdFS, "RestConfig.java"};
+            String pathDst = String.join(File.separator, splitDst);
+
+            try {
+                CompilationUnit restConfigCU = StaticJavaParser.parse(new File(path));
+                restConfigCU.setPackageDeclaration(groupID);
+                MethodDeclaration method = restConfigCU.findAll(ClassOrInterfaceDeclaration.class).get(0).getMethods().get(0);
+                String statement = "config.exposeIdsFor(";
+                BlockStmt body = new BlockStmt();
+                for (String imp : imports) {
+                    String[] split = imp.split("\\.");
+                    String className = split[split.length - 1];
+                    String classStmt = statement + className + ".class);";
+                    body.addStatement(StaticJavaParser.parseStatement(classStmt));
+                    restConfigCU.addImport(imp);
+                }
+                method.setBody(body);
+
+                this.fileUtilsProject.saveCompilationUnit(restConfigCU, pathDst);
+
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(JavaGeneratorMicroservices.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
     }

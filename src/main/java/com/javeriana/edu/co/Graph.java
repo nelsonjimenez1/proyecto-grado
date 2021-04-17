@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -46,21 +47,27 @@ public class Graph {
 
     public ArrayList<Edge> getEdgesSameMicroserviceBySrcNodeId(String nodeId, String microservice) {
 
-        ArrayList<Edge> edges = new ArrayList<>();
-        for (Edge edge : getEdgesBySrcNodeId(nodeId)) {
-            if (this.nodes.get(edge.getIdDest()).getMicroservice().equals(microservice)) {
-                edges.add(edge);
+        ArrayList<Edge> edgesSameMicro = new ArrayList<>();
+        ArrayList<Edge> edges = getEdgesBySrcNodeId(nodeId);
+        if (edges != null) {
+            for (Edge edge : edges) {
+                if (this.nodes.get(edge.getIdDest()).getMicroservice().equals(microservice)) {
+                    edgesSameMicro.add(edge);
+                }
             }
         }
-        return edges;
+        return edgesSameMicro;
     }
 
     public ArrayList<Vertex> getNodeMethodsBySrcNodeId(String nodeId) {
         ArrayList<Vertex> methods = new ArrayList<>();
-        for (Edge edge : getEdgesBySrcNodeId(nodeId)) {
-            if (edge.getTypeRelation().equals("Has")
-                    && this.nodes.get(edge.getIdDest()).getType().equalsIgnoreCase("Method")) {
-                methods.add(this.nodes.get(edge.getIdDest()));
+        ArrayList<Edge> edges = getEdgesBySrcNodeId(nodeId);
+        if (edges != null) {
+            for (Edge edge : edges) {
+                if (edge.getTypeRelation().equals("Has")
+                        && this.nodes.get(edge.getIdDest()).getType().equalsIgnoreCase("Method")) {
+                    methods.add(this.nodes.get(edge.getIdDest()));
+                }
             }
         }
         return methods;
@@ -151,15 +158,18 @@ public class Graph {
         if (getNodeByNodeId(classId).getType().equalsIgnoreCase("Class")) {
 
             ArrayList<Edge> edges = getEdgesBySrcNodeId(classId);
-            Vertex aux;
-            for (Edge edge : edges) {
-                if (edge.getTypeRelation().equalsIgnoreCase("Has method")) {
-                    aux = getNodeByNodeId(edge.getIdDest());
-                    if (aux.getType().equalsIgnoreCase("Method")) {
-                        methodByClass.add(aux);
+            if (edges != null) {
+                Vertex aux;
+                for (Edge edge : edges) {
+                    if (edge.getTypeRelation().equalsIgnoreCase("Has method")) {
+                        aux = getNodeByNodeId(edge.getIdDest());
+                        if (aux.getType().equalsIgnoreCase("Method")) {
+                            methodByClass.add(aux);
+                        }
                     }
                 }
             }
+
         }
         return methodByClass;
     }
@@ -198,10 +208,17 @@ public class Graph {
     }
 
     public Vertex getMainByMicroservice(String nameMicro) {
-        ArrayList<Vertex> list = getNodesByMicroservice(nameMicro);
-        for (Vertex vertex : list) {
-            if (vertex.getSubType().equalsIgnoreCase("SpringBootApplication")) {
-                return vertex;
+        ArrayList<Vertex> nodes = getNodesByMicroservice(nameMicro);
+        for (Vertex vertex : nodes) {
+            ArrayList<Edge> edges = getEdgesBySrcNodeId(vertex.getId());
+            if (edges != null) {
+                for (Edge edge : edges) {
+                    if (edge.getTypeRelation().equalsIgnoreCase("Has Annotation")) {
+                        if (edge.getIdDest().contains("org.springframework.boot.autoconfigure.SpringBootApplication")) {
+                            return vertex;
+                        }
+                    }
+                }
             }
         }
         return null;
@@ -209,9 +226,11 @@ public class Graph {
 
     public Vertex getParentByMethodId(String id) {
         ArrayList<Edge> edges = getEdgesByDstNodeId(id);
-        for (Edge edge : edges) {
-            if (edge.getTypeRelation().equalsIgnoreCase("Has Method")) {
-                return getNodeByNodeId(edge.getIdSrc());
+        if (edges != null) {
+            for (Edge edge : edges) {
+                if (edge.getTypeRelation().equalsIgnoreCase("Has Method")) {
+                    return getNodeByNodeId(edge.getIdSrc());
+                }
             }
         }
         return null;
@@ -245,19 +264,22 @@ public class Graph {
             for (Edge edge : edges) {
                 if (edge.getTypeRelation().equalsIgnoreCase("has method")) {
                     ArrayList<Edge> edgesMethod = getEdgesByDstNodeId(edge.getIdDest());
-                    for (Edge edgeM : edgesMethod) {
-                        if (edgeM.getTypeRelation().equalsIgnoreCase("calls")) {
-                            Vertex src = getNodeByNodeId(edgeM.getIdSrc());
-                            Vertex dst = getNodeByNodeId(edgeM.getIdDest());
-                            if (!src.getMicroservice().equals(dst.getMicroservice())) {
-                                result = true;
-                                break;
+                    if(edgesMethod != null) {
+                        for (Edge edgeM : edgesMethod) {
+                            if (edgeM.getTypeRelation().equalsIgnoreCase("calls")) {
+                                Vertex src = getNodeByNodeId(edgeM.getIdSrc());
+                                Vertex dst = getNodeByNodeId(edgeM.getIdDest());
+                                if (!src.getMicroservice().equals(dst.getMicroservice())) {
+                                    result = true;
+                                    break;
+                                }
                             }
                         }
+                        if (result) {
+                            break;
+                        }
                     }
-                    if (result) {
-                        break;
-                    }
+                    
                 }
 
             }

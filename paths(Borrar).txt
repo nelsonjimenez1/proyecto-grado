@@ -1,0 +1,15 @@
+Nelson:
+C:\Users\nelso\Documents\TG\spring-petclinic-master
+
+Santos:
+C:\Users\PC\Desktop\spring-petclinic-master
+
+Gustavo:
+C:\Tools\spring-petclinic-master
+
+Sebastián:
+C:\Users\prado\OneDrive\Documentos\TG\spring-petclinic-master
+
+
+GroupID:
+org.springframework.samples.petclinic

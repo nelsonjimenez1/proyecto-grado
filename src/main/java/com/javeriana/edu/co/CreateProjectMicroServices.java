@@ -1,4 +1,3 @@
-
 package com.javeriana.edu.co;
 
 import com.github.javaparser.StaticJavaParser;
@@ -15,8 +14,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -49,13 +50,13 @@ public class CreateProjectMicroServices {
             this.graph = graph;
             this.generator = new JavaGeneratorMicroservices(graph);
             this.port = port;
-            this.init();            
+            this.init();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
-    
-    private void init () {
+
+    private void init() {
         this.createBasicFolders();
         this.createFolderGroupID();
         this.createFolderAfterGroupID();
@@ -64,7 +65,7 @@ public class CreateProjectMicroServices {
         this.copyAuxiliaryFolders();
         this.generateFiles();
         this.updateRegister();
-        this.copyJavaFiles();
+        this.partitionFiles();
         this.createApplicationYML();
     }
 
@@ -256,7 +257,7 @@ public class CreateProjectMicroServices {
         }
     }
 
-    private void copyJavaFiles() {
+    private void partitionFiles() {
         ArrayList<Vertex> list = graph.getNodesByMicroservice(microName);
         Vertex main = graph.getMainByMicroservice(microName);
         String[] original = {this.rootInput, "src", "main", "java"};
@@ -270,8 +271,10 @@ public class CreateProjectMicroServices {
         destinyPath += File.separator + main.getName() + ".java";
         this.generator.modifyMain(originPath, destinyPath);
 
+        Set<String> exposedImports = new HashSet<String>();
+
         for (Vertex vertex : list) {
-            if (!vertex.getSubType().equals("SpringBootApplication")) {
+            if (!vertex.getId().equals(main.getId())) {
                 if (vertex.getType().equals("Class")) {
                     String[] origin = {this.rootInput, "src", "main", "java"};
                     originRight = vertex.getPackageName().split("\\.");
@@ -282,31 +285,25 @@ public class CreateProjectMicroServices {
                     destiny = concatV(destiny, destinyRight);
                     destinyPath = String.join(File.separator, destiny);
 
-                    if (vertex.getSubType().equalsIgnoreCase("Controller") || vertex.getSubType().equalsIgnoreCase("Service")) {
-                        try {
-                            CompilationUnit newCuWebService = StaticJavaParser.parse(new File(originPath));
-                            ArrayList<Vertex> methods = graph.getMethodsByClassId(vertex.getId());
-                            ArrayList<Vertex> fields = graph.getFieldsByClassId(vertex.getId());
-                            this.generator.createClass(newCuWebService, vertex, methods, fields, destinyPath + File.separator + vertex.getName() + ".java");
-                        } catch (FileNotFoundException ex) {
-                            System.out.println("File not found - CopyJavaFiles: " + ex.getMessage());
-                            Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    } else if (vertex.getSubType().equalsIgnoreCase("Repository")) {
-                        if(graph.needExpose(vertex.getId())) {                            
-                            destinyPath += File.separator + vertex.getName() + ".java";
-                            this.generator.generateExposedRepository(vertex, originPath, destinyPath);
-                        } else {
-                            copyFile(originPath, destinyPath);
-                        }
+                    try {
+                        CompilationUnit newCuWebService = StaticJavaParser.parse(new File(originPath));
+                        ArrayList<Vertex> methods = graph.getMethodsByClassId(vertex.getId());
+                        ArrayList<Vertex> fields = graph.getFieldsByClassId(vertex.getId());
+                        this.generator.createClass(newCuWebService, vertex, methods, fields, destinyPath + File.separator + vertex.getName() + ".java");
+                    } catch (FileNotFoundException ex) {
+                        System.out.println("File not found - CopyJavaFiles: " + ex.getMessage());
+                        Logger.getLogger(CreateProjectMicroServices.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    else {
-                        copyFile(originPath, destinyPath);
+                    if (vertex.getSubType().equalsIgnoreCase("Repository") && graph.needExpose(vertex.getId())) {
+                        destinyPath += File.separator + vertex.getName() + ".java";
+                        String exposedImport = this.generator.generateExposedRepository(vertex, originPath, destinyPath);
+                        exposedImports.add(exposedImport);
                     }
                 }
             }
 
         }
+        this.generator.generateExposedConfiguration(exposedImports, this.microName);
     }
 
     private String[] concatV(String[] left, String[] right) {
@@ -364,9 +361,9 @@ public class CreateProjectMicroServices {
         ArrayList<Node> nodes = xmlU.readXMLNodes(dInput, "/project/properties");
         NodeList childNodes = nodes.get(0).getChildNodes();
         List<Node> nodesArray = IntStream.range(0, childNodes.getLength())
-        .mapToObj(childNodes::item)
-        .collect(Collectors.toList());
-        
+                .mapToObj(childNodes::item)
+                .collect(Collectors.toList());
+
         for (Node nodo : nodesArray) {
             xmlU.insertNode(dOutput, "/project/properties", nodo);
         }

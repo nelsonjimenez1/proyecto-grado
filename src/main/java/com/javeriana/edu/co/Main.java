@@ -22,30 +22,31 @@ import java.util.regex.*;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {        
 
-        //cambiar ruta
-        //String borrame = "C:\\Users\\nelso\\Documents\\TG\\spring-petclinic-master"; //Nelson
-        //String borrame = "C:\\\\Users\\\\PC\\\\Desktop\\\\spring-petclinic-master"; //Santos
-        //String borrame = "C:\\Tools\\spring-petclinic-master"; //Gustavo
-        String borrame = "C:\\Users\\prado\\OneDrive\\Documentos\\TG\\spring-petclinic-master"; //Sebastián
-
-        if (/*args.length > 0*/true) {
+        if (args.length > 0) {
 
             Properties properties = new Properties();
             try {
                 File f = new File(System.getProperty("user.dir") + File.separator + "configuration.properties");
                 properties.load(new FileInputStream(f));                
-                //if(args[0] != null)                
-                    //properties.setProperty("INPUTPATH", args[0]);
-                properties.setProperty("INPUTPATH", borrame);
+                if(args[0] != null && args[1] != null) {
+                    properties.setProperty("INPUTPATH", args[0]);
+                    properties.setProperty("GROUPID", args[1]);
+                } else {
+                    throw new Exception("No enough parameters, please give the 'input path' and the 'groupId'");
+                }
                 properties.store(new FileOutputStream(f), null);
+                Controller c = new Controller();
+                System.out.println("--------------------------------------");
+                System.out.println("Transformation Finished");
+                System.out.println("--------------------------------------");
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
+        } else {
+            System.out.println("No enough parameters, please give the 'input path' and the 'groupId'");        
         }
-
-        Controller c = new Controller();
-        System.out.println("ToyFuncionando guiño guiño");
+        
     }
 }

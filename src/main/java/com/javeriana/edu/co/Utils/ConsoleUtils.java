@@ -24,14 +24,12 @@ public class ConsoleUtils {
         try {
             
             String osName = System.getProperty("os.name");
-            String console = "";
+            String console = "sh -c ";
             
-            if(osName.contains("windows"))
-            {
-                
-            }
+            if(osName.toLowerCase().contains("windows"))
+                console = "cmd /c ";
             
-            String commandMvn = "cmd /c " + command;
+            String commandMvn = console + command;
 
             System.out.println("---------------------------------------------------");
             System.out.println("Executing command: \"" + command + "\" in: \"output" + File.separator + name + "\"");
@@ -54,19 +52,25 @@ public class ConsoleUtils {
 
     public String getRegisterIP() {
         try {
-            // TODO: Diferenciar windows o linux
-            String commandMvn = "cmd /c " + "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' register";
-            Process p = Runtime.getRuntime().exec(commandMvn, null, new File("output", "microservices-register"));
+            
+            String osName = System.getProperty("os.name");
+            String console = "sh -c ";
+            
+            if(osName.toLowerCase().contains("windows"))
+                console = "cmd /c ";          
+            
+            String commandMvn = console + "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' register";
+            /*Process p = Runtime.getRuntime().exec(commandMvn, null, new File("output", "microservices-register"));
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line = "";
             if ((line = reader.readLine()) != null) {
                 return line;
-            }
+            }*/
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return null;
+        return "1111"; //null
     }
 
 }

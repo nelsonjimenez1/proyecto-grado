@@ -200,7 +200,6 @@ public class JavaGeneratorWeb extends JavaGenerator{
             }
         });
         newMethod.setBody(new BlockStmt().addStatement(new TryStmt().setTryBlock(tryStatement).setCatchClauses(catchClauses)));
-        System.out.println("METHOD: " + newMethod);
     }
 
     @Override
