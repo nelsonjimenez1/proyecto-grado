@@ -27,7 +27,6 @@ public class Graph {
         this.nodes = new HashMap<>();
         this.edges = new HashMap<>();
         this.utils = new ExcelUtils();
-
         this.utils.loadNodes(nodes);
         this.utils.loadConnections(edges);
 

@@ -69,6 +69,9 @@ public class ExcelUtils {
                 }
                 nodes.put(node.getId(), node);
             }
+            System.out.println("--------------------------------------");
+            System.out.println("graph nodes reading completed");        
+            System.out.println("--------------------------------------");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,6 +126,9 @@ public class ExcelUtils {
                 }
                 edges.get(edge.getIdSrc()).add(edge);
             }
+            System.out.println("--------------------------------------");
+            System.out.println("graph connections reading completed");   
+            System.out.println("--------------------------------------");
         } catch (Exception e) {
             e.printStackTrace();
         }
