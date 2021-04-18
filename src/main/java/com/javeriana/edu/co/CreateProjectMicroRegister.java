@@ -22,6 +22,10 @@ public class CreateProjectMicroRegister {
         String[] splitMicro = {System.getProperty("user.dir"),"output"};
         String pathMicro = String.join(File.separator, splitMicro);
         this.utils.copyAnotherDirectory(path,pathMicro);
+        System.out.println("--------------------------------------");
+        System.out.println("microservices-register construction finished");
+        System.out.println("--------------------------------------");
+        
     }
         
 }

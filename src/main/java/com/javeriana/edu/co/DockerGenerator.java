@@ -45,7 +45,8 @@ public class DockerGenerator {
         lines.add(add);
         lines.add(expose); 
         lines.add(coment); 
-        write(file, lines);               
+        write(file, lines);   
+        System.out.println("DokerFile was generated for " + microName);
         
     }
     public void write(File file, List<String> lines) {

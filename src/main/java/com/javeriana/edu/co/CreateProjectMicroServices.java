@@ -57,6 +57,8 @@ public class CreateProjectMicroServices {
     }
 
     private void init() {
+        System.out.println("--------------------------------------");
+        System.out.println("creating project for " + this.microName);
         this.createBasicFolders();
         this.createFolderGroupID();
         this.createFolderAfterGroupID();
@@ -67,6 +69,8 @@ public class CreateProjectMicroServices {
         this.updateRegister();
         this.partitionFiles();
         this.createApplicationYML();
+        System.out.println("project creation finished");
+        System.out.println("--------------------------------------");
     }
 
     public void createBasicFolders() {
@@ -88,6 +92,7 @@ public class CreateProjectMicroServices {
             File directory = new File(System.getProperty("user.dir"), "output" + rout + File.separator + sc);
             directory.mkdir();
         }
+        System.out.println("basic folders created");
     }
 
     public void createFolderGroupID() {
@@ -110,6 +115,7 @@ public class CreateProjectMicroServices {
         directory.mkdir();
         directory = new File(pathDirectory + File.separator + "registration");
         directory.mkdir();
+        System.out.println("groupId folder created");
     }
 
     public void createPOM() {
@@ -124,6 +130,7 @@ public class CreateProjectMicroServices {
         String[] splitPathXml = {System.getProperty("user.dir"), "output", microName, "pom.xml"};
         String pathXml = String.join(File.separator, splitPathXml);
         xmlU.saveXML(dOutput, pathXml);
+        System.out.println("POM file created");
     }
 
     public void addDependencies(Document dOutput) {
@@ -196,6 +203,7 @@ public class CreateProjectMicroServices {
                 copyAnotherDirectory(path + File.separator + list.get(i).getName(), System.getProperty("user.dir") + File.separator + pathMicro);
             }
         }
+        System.out.println("Auxiliary folders created");
     }
 
     private ArrayList<File> listDirectory(String dirName) {
@@ -255,6 +263,7 @@ public class CreateProjectMicroServices {
                 directory.mkdir();
             }
         }
+        System.out.println("folders into groupId folder created");
     }
 
     private void partitionFiles() {
@@ -336,6 +345,7 @@ public class CreateProjectMicroServices {
                 }
                 FileRead.close();
             }
+            System.out.println("YML file created");
         } catch (Exception e) {
             System.out.println("CreateAplicationYML: " + e.getMessage());
         }
