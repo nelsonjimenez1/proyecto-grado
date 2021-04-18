@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -151,6 +152,19 @@ public class Graph {
             }
         }
         return entities;
+    }
+    
+    public Set<String> getEntitiesByMicroservice(String microService) {
+        Set<String> exposedImports = new HashSet<String>();
+
+        Collection<Vertex> nodesAux = this.getAllNodes();
+        for (Vertex node : nodesAux) {
+            if (node.getMicroservice().equals(microService) && node.getSubType().equalsIgnoreCase("entity")) {
+                exposedImports.add(node.getPackageName() +  "." + node.getName());
+            }
+        }
+
+        return exposedImports;
     }
 
     public ArrayList<Vertex> getMethodsByClassId(String classId) {

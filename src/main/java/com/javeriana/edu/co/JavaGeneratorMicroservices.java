@@ -575,7 +575,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         return result;
     }
 
-    public String generateExposedRepository(Vertex vertex, String srcPath, String dstPath) {
+    public void generateExposedRepository(Vertex vertex, String srcPath, String dstPath) {
 
         String exposedClass = "";
         String result = "";
@@ -596,7 +596,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
                 }
             }
 
-            NodeList<ImportDeclaration> imports = cuRepo.getImports();
+            /*NodeList<ImportDeclaration> imports = cuRepo.getImports();
             for (ImportDeclaration aImport : imports) {
                 if (aImport.getNameAsString().contains(exposedClass)) {
                     result = aImport.getNameAsString();
@@ -605,15 +605,13 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
 
             if (result.equals("")) {
                 result = vertex.getPackageName() + "." + exposedClass;
-            }
+            }*/
 
             this.fileUtilsProject.saveCompilationUnit(cuRepo, dstPath);
 
         } catch (Exception ex) {
             System.out.println("ERROR: " + ex.getMessage());
         }
-
-        return result;
     }
 
     public void generateExposedConfiguration(Set<String> imports, String microName) {

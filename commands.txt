@@ -1,2 +1,6 @@
 java -jar target/microservices-register-2.1.0.RELEASE.jar
 java -jar target/spring-petclinic-owner-2.1.0.RELEASE.jar
+
+localhost:3334/interface/search/findById?id=1
+
+docker network rm microservices-net
