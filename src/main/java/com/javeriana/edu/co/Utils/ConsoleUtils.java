@@ -49,28 +49,4 @@ public class ConsoleUtils {
             System.out.println(line);
         }
     }
-
-    public String getRegisterIP() {
-        try {
-            
-            String osName = System.getProperty("os.name");
-            String console = "";
-            
-            if(osName.toLowerCase().contains("windows"))
-                console = "cmd /c ";          
-            
-            String commandMvn = console + "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' register";
-            Process p = Runtime.getRuntime().exec(commandMvn, null, new File("output", "microservices-register"));
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line = "";
-            if ((line = reader.readLine()) != null) {
-                return line;
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return null; //null
-    }
-
 }
