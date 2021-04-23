@@ -40,10 +40,9 @@ public class ParitionCotroller {
     private void init() {
         this.consoleUtils.executeCommand("microservices-register", "docker network create microservices-net");
         this.consoleUtils.doMvnPackage("microservices-register");
-        this.dockerG.generateDockerFile("microservices-register", portGeneric);
-        portGeneric++;
+        this.dockerG.generateDockerFile("microservices-register", 1111);
         this.consoleUtils.executeCommand("microservices-register", "docker build -t microservices-register-image .");
-        this.consoleUtils.executeCommand("microservices-register", "docker run --name register --network microservices-net -dp " + this.portGeneric + ":" + this.portGeneric +" microservices-register-image java -jar app.jar");
+        this.consoleUtils.executeCommand("microservices-register", "docker run --name register --network microservices-net -dp 1111:1111 microservices-register-image java -jar app.jar");
         this.registerIP = this.consoleUtils.getRegisterIP();
         this.registerIP = this.registerIP.substring(1, this.registerIP.length() - 1);
         this.hashMapMicroservice = new HashMap<>();
@@ -51,10 +50,9 @@ public class ParitionCotroller {
         this.travelArrayMicroservice();
         CreateProjectMicroWeb newMicroWeb = new CreateProjectMicroWeb(this.graph);
         this.consoleUtils.doMvnPackage("microservices-web");
-        this.dockerG.generateDockerFile("microservices-web", portGeneric);
-        portGeneric++;
+        this.dockerG.generateDockerFile("microservices-web", 2222);
         this.consoleUtils.executeCommand("microservices-web", "docker build -t microservices-web-image .");
-        this.consoleUtils.executeCommand("microservices-web", "docker run --network microservices-net -dp " + this.portGeneric + ":" + this.portGeneric + " microservices-web-image java -jar app.jar   --registration.server.hostname=" + registerIP);
+        this.consoleUtils.executeCommand("microservices-web", "docker run --network microservices-net -dp 2222:2222 microservices-web-image java -jar app.jar   --registration.server.hostname=" + registerIP);
     }
 
     /**
