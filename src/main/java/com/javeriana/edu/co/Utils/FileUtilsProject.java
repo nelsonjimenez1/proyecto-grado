@@ -12,12 +12,21 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
  * @author prado
  */
-public class FileUtilsProject {       
+public class FileUtilsProject {   
+
+    public void deleteOutput() {
+        try {
+            FileUtils.deleteDirectory(new File("output"));
+        } catch (IOException ex) {
+            Logger.getLogger(FileUtilsProject.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     public void copyAnotherDirectory(String origin, String destiny) {
         File from = new File(origin);

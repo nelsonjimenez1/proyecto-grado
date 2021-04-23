@@ -1,24 +1,9 @@
 package com.javeriana.edu.co;
 
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.visitor.*;
-import com.github.javaparser.ast.body.*;
-import com.github.javaparser.ast.comments.*;
-import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.resolution.types.ResolvedType;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Properties;
-import java.util.regex.*;
 
 public class Main {
 
@@ -37,7 +22,7 @@ public class Main {
                     throw new Exception("No enough parameters, please give the 'input path' and the 'groupId'");
                 }
                 properties.store(new FileOutputStream(f), null);
-                Controller c = new Controller();
+                ParitionCotroller c = new ParitionCotroller(args[2]);
                 System.out.println("--------------------------------------");
                 System.out.println("Transformation Finished");
                 System.out.println("--------------------------------------");

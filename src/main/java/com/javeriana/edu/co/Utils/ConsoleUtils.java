@@ -24,7 +24,7 @@ public class ConsoleUtils {
         try {
             
             String osName = System.getProperty("os.name");
-            String console = "sh -c ";
+            String console = "";
             
             if(osName.toLowerCase().contains("windows"))
                 console = "cmd /c ";
@@ -54,7 +54,7 @@ public class ConsoleUtils {
         try {
             
             String osName = System.getProperty("os.name");
-            String console = "sh -c ";
+            String console = "";
             
             if(osName.toLowerCase().contains("windows"))
                 console = "cmd /c ";          
