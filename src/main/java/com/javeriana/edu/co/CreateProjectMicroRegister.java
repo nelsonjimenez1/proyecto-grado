@@ -24,8 +24,6 @@ public class CreateProjectMicroRegister {
         this.utils.copyAnotherDirectory(path,pathMicro);
         System.out.println("--------------------------------------");
         System.out.println("microservices-register construction finished");
-        System.out.println("--------------------------------------");
-        
-    }
-        
+        System.out.println("--------------------------------------"); 
+    }        
 }

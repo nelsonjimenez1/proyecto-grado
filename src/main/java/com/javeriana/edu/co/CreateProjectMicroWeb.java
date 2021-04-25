@@ -30,6 +30,5 @@ public class CreateProjectMicroWeb {
         System.out.println("--------------------------------------");
         System.out.println("microservices-web construction finished");
         System.out.println("--------------------------------------");
-    }
-    
+    }  
 }
