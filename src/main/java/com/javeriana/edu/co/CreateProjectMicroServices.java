@@ -247,7 +247,7 @@ public class CreateProjectMicroServices {
     }
 
     private void updateRegister() {
-        this.generator.updateRegister(microName, rootGroupID);
+        this.generator.addRegisterClass(microName, rootGroupID);
     }
 
     private void createFolderAfterGroupID() {
