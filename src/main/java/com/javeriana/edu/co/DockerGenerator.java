@@ -19,19 +19,28 @@ import org.w3c.dom.Node;
  */
 
 /**
- *
- * @author Gustavo Rivera
+ * This class creates and allows you to create the dockerfile
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
  */
 public class DockerGenerator {
     public static int lineJump = 4; 
     public static String image ="openjdk:8-alpine";
     
     public XMLUtils xmlU;
-    
+    /**
+     * Contructor
+     */
     DockerGenerator(){
         xmlU = new XMLUtils();
     }
-    
+    /**
+     * Allows to create the docker file given the microservice name and the port
+     * @param microName the microservice name
+     * @param port port where it will be exposed
+     */
     public void generateDockerFile(String microName, int port){
         String[] split = {"output", microName, "Dockerfile"};
         List<String> lines = new ArrayList<>(); 
@@ -49,6 +58,11 @@ public class DockerGenerator {
         System.out.println("DokerFile was generated for " + microName);
         
     }
+    /**
+     * allows you to write to a file 
+     * @param file file to write
+     * @param lines lines to write 
+     */
     public void write(File file, List<String> lines) {
         BufferedWriter bw;
         try {
@@ -65,6 +79,11 @@ public class DockerGenerator {
             Logger.getLogger(DockerGenerator.class.getName()).log(Level.SEVERE, null, e);
         }
     }
+    /**
+     * Allows you to obtain the necessary information to add the .jar
+     * @param microName microservice name
+     * @return 
+     */
     public String getADDText(String microName){
         Document d = xmlU.openXMLFile(System.getProperty("user.dir") + File.separator +"output"+ File.separator + microName + File.separator + "pom.xml");
         ArrayList<Node> nodoVersion = xmlU.readXMLNodes(d, "/project/version");
