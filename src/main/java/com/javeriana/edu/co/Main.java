@@ -38,6 +38,5 @@ public class Main {
         } else {
             System.out.println("No enough parameters, please give the 'input path' and the 'groupId'");
         }
-
     }
 }

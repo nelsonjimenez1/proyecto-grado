@@ -508,7 +508,4 @@ public class JavaGeneratorWeb extends JavaGenerator{
             Logger.getLogger(CreateProjectMicroWeb.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-
-
 }

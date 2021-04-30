@@ -56,8 +56,5 @@ public class Edge {
 
     public String getTypeRelation() {
         return typeRelation;
-    }
-  
-
-    
+    }  
 }

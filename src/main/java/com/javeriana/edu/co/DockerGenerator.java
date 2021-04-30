@@ -76,5 +76,4 @@ public class DockerGenerator {
         String add = artifactId +"-"+version+"."+packaging;
         return add;
     }
-    
 }

@@ -91,8 +91,4 @@ public class Vertex {
     public void setLabel(String label) {
         this.label = label;
     }
-    
-    
-    
-
 }
