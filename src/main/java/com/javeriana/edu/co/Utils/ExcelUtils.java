@@ -11,9 +11,20 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
+/**
+ * This class creates and allows you to manipulate the Excel files
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
+ */
 public class ExcelUtils {
 
+    /**
+     * Allows you to load the nodes by reading an excel file, 
+     * where the specifications for the network are found.
+     * @param nodes an empty hashmap to be filled with the nodes found in the excel file
+     */
     public void loadNodes(HashMap<String, Vertex> nodes) {
         String[] split = {System.getProperty("user.dir"), "input", "graph.xlsx"};
         String filename = String.join(File.separator, split);
@@ -76,7 +87,11 @@ public class ExcelUtils {
             e.printStackTrace();
         }
     }
-
+    /**
+     * Allows the edges to be loaded by reading an excel file, 
+     * where the specifications for the network are found.
+     * @param edges an empty hashmap to be filled with the edges found in the excel file
+     */
     public void loadConnections(HashMap<String, ArrayList<Edge>> edges) {
         String[] split = {System.getProperty("user.dir"), "input", "graph.xlsx"};
         String filename = String.join(File.separator, split);
