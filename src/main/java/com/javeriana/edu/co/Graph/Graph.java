@@ -1,22 +1,11 @@
-package com.javeriana.edu.co;
+package com.javeriana.edu.co.Graph;
 
 import com.javeriana.edu.co.Utils.ExcelUtils;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * This class creates and allows you to manipulate the graph, taking into account the specifications of the input
@@ -331,7 +320,7 @@ public class Graph {
      * @param classId the ID of a class 
      * @return A list of vertex
      */
-    ArrayList<Vertex> getFieldsByClassId(String classId) {
+    public ArrayList<Vertex> getFieldsByClassId(String classId) {
         ArrayList<Vertex> fieldsByClass = new ArrayList<>();
         if (getNodeByNodeId(classId).getType().equalsIgnoreCase("Class")) {
 
@@ -357,7 +346,7 @@ public class Graph {
      * @return true: if the repository is to be exposed
      *         false: if the repository should not be exposed
      */
-    boolean needExpose(String repositoryId) {
+    public boolean needExpose(String repositoryId) {
         boolean result = false;
         ArrayList<Edge> edges = getEdgesBySrcNodeId(repositoryId);
         if (edges != null) {

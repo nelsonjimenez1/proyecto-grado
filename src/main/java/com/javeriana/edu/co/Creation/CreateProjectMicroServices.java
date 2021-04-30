@@ -1,8 +1,10 @@
-package com.javeriana.edu.co;
+package com.javeriana.edu.co.Creation;
 
+import com.javeriana.edu.co.Generation.JavaGeneratorMicroservices;
+import com.javeriana.edu.co.Graph.Vertex;
+import com.javeriana.edu.co.Graph.Graph;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.javeriana.edu.co.Utils.FileUtilsProject;
 import com.javeriana.edu.co.Utils.XMLUtils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,10 +16,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;

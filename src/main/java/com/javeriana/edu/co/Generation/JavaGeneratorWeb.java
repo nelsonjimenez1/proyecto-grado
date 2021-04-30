@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.javeriana.edu.co;
+package com.javeriana.edu.co.Generation;
 
+import com.javeriana.edu.co.Graph.Vertex;
+import com.javeriana.edu.co.Graph.Graph;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -23,7 +24,7 @@ import com.github.javaparser.ast.stmt.CatchClause;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.TypeParameter;
-import com.javeriana.edu.co.Utils.FileUtilsProject;
+import com.javeriana.edu.co.Creation.CreateProjectMicroWeb;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,7 +38,10 @@ import java.util.logging.Logger;
 
 /**
  * Generate services java files, controllers java files and  WebServer java file of the project microservice web
- *
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
  */
 public class JavaGeneratorWeb extends JavaGenerator{
 

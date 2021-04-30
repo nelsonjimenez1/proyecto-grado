@@ -1,5 +1,7 @@
-package com.javeriana.edu.co;
+package com.javeriana.edu.co.Generation;
 
+import com.javeriana.edu.co.Graph.Vertex;
+import com.javeriana.edu.co.Graph.Graph;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;

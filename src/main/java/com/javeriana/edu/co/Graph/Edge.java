@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.javeriana.edu.co;
+package com.javeriana.edu.co.Graph;
 
 /**
  * This class creates and allows you to manipulate the edge  , taking into account the specifications of the input

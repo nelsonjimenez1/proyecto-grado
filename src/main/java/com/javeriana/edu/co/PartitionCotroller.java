@@ -1,5 +1,10 @@
 package com.javeriana.edu.co;
 
+import com.javeriana.edu.co.Creation.CreateProjectMicroServices;
+import com.javeriana.edu.co.Creation.CreateProjectMicroWeb;
+import com.javeriana.edu.co.Creation.CreateProjectMicroRegister;
+import com.javeriana.edu.co.Generation.DockerGenerator;
+import com.javeriana.edu.co.Graph.Graph;
 import com.javeriana.edu.co.Utils.ConsoleUtils;
 import com.javeriana.edu.co.Utils.FileUtilsProject;
 import java.util.ArrayList;
@@ -9,7 +14,7 @@ import java.util.HashMap;
  * 
  * @author nelso
  */
-public class ParitionCotroller {
+public class PartitionCotroller {
 
     private Graph graph;
     private CreateProjectMicroRegister createProjectMicroRegister;
@@ -25,7 +30,7 @@ public class ParitionCotroller {
      *
      * @param port
      */
-    public ParitionCotroller(String port) {
+    public PartitionCotroller(String port) {
         this.portGeneric = Integer.parseInt(port);
         this.fileUtilsProject = new FileUtilsProject();
         this.dockerG = new DockerGenerator();

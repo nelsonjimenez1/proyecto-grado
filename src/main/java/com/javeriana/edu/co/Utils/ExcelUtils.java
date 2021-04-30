@@ -1,7 +1,7 @@
 package com.javeriana.edu.co.Utils;
 
-import com.javeriana.edu.co.Edge;
-import com.javeriana.edu.co.Vertex;
+import com.javeriana.edu.co.Graph.Edge;
+import com.javeriana.edu.co.Graph.Vertex;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;

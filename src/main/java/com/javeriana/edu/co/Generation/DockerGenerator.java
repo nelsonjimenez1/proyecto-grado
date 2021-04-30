@@ -1,4 +1,4 @@
-package com.javeriana.edu.co;
+package com.javeriana.edu.co.Generation;
 
 import com.javeriana.edu.co.Utils.XMLUtils;
 import java.io.BufferedWriter;
@@ -33,7 +33,7 @@ public class DockerGenerator {
     /**
      * Contructor
      */
-    DockerGenerator(){
+    public DockerGenerator(){
         xmlU = new XMLUtils();
     }
     /**
