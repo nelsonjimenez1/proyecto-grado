@@ -1,20 +1,30 @@
 
-package com.javeriana.edu.co;
+package com.javeriana.edu.co.Creation;
 
 import com.javeriana.edu.co.Utils.FileUtilsProject;
 import java.io.File;
 
-
+/**
+ * This class creates the microservice register
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
+ */
 public class CreateProjectMicroRegister {
     
     private FileUtilsProject utils;
-    
+    /**
+     * Contructor
+     */
     public CreateProjectMicroRegister()
     {   
         this.utils = new FileUtilsProject();
         this.copyFolder();  
     }
-    
+    /**
+     * Allows copying files and folders from the register template
+     */
     private void copyFolder() {
       
         String[] split = {System.getProperty("user.dir"),"templates","microservices-register"};

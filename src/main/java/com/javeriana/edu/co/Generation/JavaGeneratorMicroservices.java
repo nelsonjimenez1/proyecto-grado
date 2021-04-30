@@ -1,8 +1,9 @@
-package com.javeriana.edu.co;
+package com.javeriana.edu.co.Generation;
 
+import com.javeriana.edu.co.Graph.Vertex;
+import com.javeriana.edu.co.Graph.Graph;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -23,7 +24,6 @@ import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.TypeParameter;
-import com.javeriana.edu.co.Utils.FileUtilsProject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,16 +33,28 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * This class generates the .java code files of the microservices, taking into account the specifications of the graph
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
+ */
 public class JavaGeneratorMicroservices extends JavaGenerator {
 
     public JavaGeneratorMicroservices(Graph graph) {
         super(graph);
     }
 
-    public void updateRegister(String nameMicroService, String rooteGroupID) {
+    /**
+     * This method adds the RegistrationServer.java class to the microservice project
+     * @param nameMicroService: represents the name of the microservice that is being generated
+     * @param pathGroupID: represents the path where files begin in the format: "example/example2/.../exampleN"
+     */
+    public void addRegisterClass(String nameMicroService, String pathGroupID) {
         try {
             String[] splitRegistrationServer = {"templates", "RegistrationServer.java"};
-            String[] splitRegistrationServerWrite = {"output", nameMicroService, "src", "main", "java", rooteGroupID, "services", "registration", "RegistrationServer.java"};
+            String[] splitRegistrationServerWrite = {"output", nameMicroService, "src", "main", "java", pathGroupID, "services", "registration", "RegistrationServer.java"};
             String path = String.join(File.separator, splitRegistrationServer);
             String pathWriteFile = String.join(File.separator, splitRegistrationServerWrite);
             CompilationUnit cu = StaticJavaParser.parse(new File(System.getProperty("user.dir"), path));
@@ -54,9 +66,14 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         }
     }
 
-    void modifyMain(String originPath, String destinyPath) {
+    /**
+     * This method modifies the Main Class (which has the annotation @SpringBootApplication) in order to add necessary imports, annotations and methods
+     * @param sourcePath: represents the path of the main class in the original project
+     * @param destinyPath: represents the path where the main class is going to be located in the microservice project
+     */
+    public void modifyMain(String sourcePath, String destinyPath) {
         try {
-            CompilationUnit cuMain = StaticJavaParser.parse(new File(originPath));
+            CompilationUnit cuMain = StaticJavaParser.parse(new File(sourcePath));
             String import1 = "org.springframework.web.client.RestTemplate";
             String import2 = "org.springframework.cloud.client.loadbalancer.LoadBalanced";
             String import3 = "org.springframework.context.annotation.Bean";
@@ -100,7 +117,15 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
 
     }
 
-    public void createClass(CompilationUnit originalCu, Vertex classNode, ArrayList<Vertex> methods, ArrayList<Vertex> fields, String rootDest) {
+    /**
+     * This method creates the class of the input node depending of the input methods and fields that remain
+     * @param originalCu: represents the CompilationUnit of the original java file of the class
+     * @param classVertex: represents the vertex of the class in the graph
+     * @param methods: represents the vertex methods that remain in the class
+     * @param fields: represents the vertex fields that remain in the class
+     * @param destPath: represents the path where the class is going to be located in the microservice project
+     */
+    public void createClass(CompilationUnit originalCu, Vertex classVertex, ArrayList<Vertex> methods, ArrayList<Vertex> fields, String destPath) {
         try {
             System.out.println("createClass");
             CompilationUnit newCu = new CompilationUnit();
@@ -109,11 +134,11 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
             newCu.setPackageDeclaration(originalCu.getPackageDeclaration().get());
 
             originalCu.findAll(ClassOrInterfaceDeclaration.class).forEach(declaration -> {
-                if (declaration.getName().asString().equals(classNode.getName().trim())) {
+                if (declaration.getName().asString().equals(classVertex.getName().trim())) {
                     ClassOrInterfaceDeclaration aux = newCu.addClass(declaration.getName().toString(), getKeywords(declaration.getModifiers()));
                     addComplemets(declaration, aux);
                     addAnnotations(declaration, aux);
-                    if (!classNode.getSubType().equalsIgnoreCase("Repository")) {
+                    if (!classVertex.getSubType().equalsIgnoreCase("Repository")) {
                         if (fields.isEmpty()) {
                             addFieldsToClass(declaration, aux);
                             addConstructors(declaration, aux);
@@ -127,12 +152,12 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
                     }
 
                     if (methods.isEmpty()) {
-                        addMethodsToClass(declaration, aux, classNode);
+                        addMethodsToClass(declaration, aux, classVertex);
                     } else {
-                        addMethodsToClass(declaration, aux, methods, classNode);
+                        addMethodsToClass(declaration, aux, methods, classVertex);
                     }
 
-                    this.fileUtilsProject.saveCompilationUnit(newCu, rootDest);
+                    this.fileUtilsProject.saveCompilationUnit(newCu, destPath);
                 }
             });
 
@@ -141,7 +166,12 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         }
     }
 
-    public void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
+    /**
+     * This method adds the constructors from one ClassOrInterfaceDeclaration to another
+     * @param originalClass: represents the original ClassOrInterfaceDeclaration
+     * @param newClass: represents the new ClassOrInterfaceDeclaration to add the constructors
+     */
+    private void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
         originalClass.getConstructors().forEach(constructor -> {
             ConstructorDeclaration newConstructor = newClass.addConstructor(getKeywords(constructor.getModifiers()));
             newConstructor.setParameters(constructor.getParameters());
@@ -153,7 +183,13 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         });
     }
 
-    public void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> fieldsNodes) {
+    /**
+     * This method adds the constructors from one ClassOrInterfaceDeclaration to another, and modify them depending of the fields that remain in the new class
+     * @param originalClass: represents the original ClassOrInterfaceDeclaration
+     * @param newClass: represents the new ClassOrInterfaceDeclaration to add the constructors
+     * @param fieldsNodes: represents the vertex fields that remain in the new class
+     */
+    private void addConstructors(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> fieldsNodes) {
 
         originalClass.getConstructors().forEach(constructor -> {
             ConstructorDeclaration newConstructor = newClass.addConstructor(getKeywords(constructor.getModifiers()));
@@ -184,19 +220,35 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         });
     }
 
-    public void addAnnotations(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
+    /**
+     * This method adds the annotations from one ClassOrInterfaceDeclaration to another
+     * @param originalClass: represents the original ClassOrInterfaceDeclaration
+     * @param newClass: represents the new ClassOrInterfaceDeclaration to add the annotations
+     */
+    private void addAnnotations(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
         newClass.setAnnotations(originalClass.getAnnotations());
         if (originalClass.getComment().isPresent()) {
             newClass.setComment(originalClass.getComment().get());
         }
     }
 
-    public void addComplemets(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
+    /**
+     * This method adds the complements (Extended and Implemented types) from one ClassOrInterfaceDeclaration to another
+     * @param originalClass: represents the original ClassOrInterfaceDeclaration
+     * @param newClass: represents the new ClassOrInterfaceDeclaration to add the complements
+     */
+    private void addComplemets(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
         newClass.setExtendedTypes(originalClass.getExtendedTypes());
         newClass.setImplementedTypes(originalClass.getImplementedTypes());
     }
-
-    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Vertex classNode) {
+    
+    /**
+     * This method adds the methods from one ClassOrInterfaceDeclaration to another
+     * @param originalClass: represents the original ClassOrInterfaceDeclaration
+     * @param newClass: represents the new ClassOrInterfaceDeclaration to add the methods
+     * @param classVertex: represents the vertex of the new class in the graph
+     */
+    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, Vertex classVertex) {
         originalClass.findAll(MethodDeclaration.class).forEach(method -> {
 
             MethodDeclaration aux = newClass.addMethod(method.getName().toString(), getKeywords(method.getModifiers()));
@@ -209,7 +261,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
                 aux.setComment(method.getComment().get());
             }
 
-            if (!classNode.getSubType().equalsIgnoreCase("Repository")) {
+            if (!classVertex.getSubType().equalsIgnoreCase("Repository")) {
                 aux.setBody(method.getBody().get());
             } else {
                 aux.setBody(null);
@@ -217,7 +269,14 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         });
     }
 
-    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> methods, Vertex classNode) {
+    /**
+     * This method adds the methods from one ClassOrInterfaceDeclaration to another depending of the methods that remain in the new class
+     * @param originalClass: represents the original ClassOrInterfaceDeclaration
+     * @param newClass: represents the new ClassOrInterfaceDeclaration to add the methods
+     * @param methods: represents the vertex methods that remain in the new class
+     * @param classVertex: represents the vertex of the new class in the graph
+     */
+    private void addMethodsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> methods, Vertex classVertex) {
         originalClass.findAll(MethodDeclaration.class).forEach(method -> {
 
             String idVertex = methodValidate(methods, method);
@@ -235,10 +294,10 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
                 ArrayList<Vertex> methodsDistinct = graph.getMethodsDistinctMicroservices(idVertex);
 
                 if (!methodsDistinct.isEmpty()) {
-                    createRepositoryStubClass(methodsDistinct, idVertex, newClass);
+                    createRepositoryStubClasses(methodsDistinct, idVertex);
                 }
 
-                if (!classNode.getSubType().equalsIgnoreCase("Repository")) {
+                if (!classVertex.getSubType().equalsIgnoreCase("Repository")) {
                     aux.setBody(method.getBody().get());
                 } else {
                    aux.setBody(null);
@@ -247,25 +306,11 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         });
     }
 
-    private void addFieldsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> fieldsNodes) {
-        System.out.println("fields");
-        originalClass.findAll(FieldDeclaration.class).forEach(field -> {
-            System.out.println("FieldDeclaration name: " + field.getVariables().get(0).getName());
-            if (fieldsContains(fieldsNodes, field)) {
-                FieldDeclaration aux;
-                if (field.getVariable(0).getInitializer().isPresent()) {
-                    aux = newClass.addFieldWithInitializer(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), field.getVariable(0).getInitializer().get(), getKeywords(field.getModifiers()));
-                } else {
-                    aux = newClass.addField(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), getKeywords(field.getModifiers()));
-                }
-                aux.setAnnotations(field.getAnnotations());
-                if (field.getComment().isPresent()) {
-                    aux.setComment(field.getComment().get());
-                }
-            }
-        });
-    }
-
+    /**
+     * This method adds the fields from one ClassOrInterfaceDeclaration to another
+     * @param originalClass: represents the original ClassOrInterfaceDeclaration
+     * @param newClass: represents the new ClassOrInterfaceDeclaration to add the methods
+     */
     private void addFieldsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass) {
         System.out.println("fields");
         originalClass.findAll(FieldDeclaration.class).forEach(field -> {
@@ -284,13 +329,43 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
             }
         });
     }
+    
+    /**
+     * This method adds the fields from one ClassOrInterfaceDeclaration to another depending of the fields that remain in the new class
+     * @param originalClass: represents the original ClassOrInterfaceDeclaration
+     * @param newClass: represents the new ClassOrInterfaceDeclaration to add the methods
+     * @param fields: represents the vertex fields that remain in the new class
+     */
+    private void addFieldsToClass(ClassOrInterfaceDeclaration originalClass, ClassOrInterfaceDeclaration newClass, ArrayList<Vertex> fields) {
+        System.out.println("fields");
+        originalClass.findAll(FieldDeclaration.class).forEach(field -> {
+            System.out.println("FieldDeclaration name: " + field.getVariables().get(0).getName());
+            if (fieldsContains(fields, field)) {
+                FieldDeclaration aux;
+                if (field.getVariable(0).getInitializer().isPresent()) {
+                    aux = newClass.addFieldWithInitializer(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), field.getVariable(0).getInitializer().get(), getKeywords(field.getModifiers()));
+                } else {
+                    aux = newClass.addField(field.getVariables().get(0).getTypeAsString(), field.getVariables().get(0).getName().toString(), getKeywords(field.getModifiers()));
+                }
+                aux.setAnnotations(field.getAnnotations());
+                if (field.getComment().isPresent()) {
+                    aux.setComment(field.getComment().get());
+                }
+            }
+        });
+    }
 
+    /**
+     * This method indicates if a FieldDeclaration is contained in an array of Vertex fields
+     * @param fields: represents the array of Vertex fields
+     * @param field: represents the FieldDeclaration to find
+     * @return  True: if the field is contained in the fields
+     *          False: if the field isn't contained in the fields
+     */
     private boolean fieldsContains(ArrayList<Vertex> fields, FieldDeclaration field) {
         boolean result = false;
         for (Vertex f : fields) {
             String split[] = f.getName().split("\\.");
-            String a = split[1];
-            String b = field.getVariables().get(0).getName().asString();
             if (split[1].equals(field.getVariables().get(0).getName().asString())) {
                 result = true;
                 break;
@@ -299,6 +374,13 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         return result;
     }
 
+    /**
+     * This method validates if a MethodDeclaration is contained in an array of Vertex methods
+     * @param methods: represents an array of Vertex methods
+     * @param method: represents the MethodDeclaration to validate
+     * @return  The ID of the Vertex that represents the MethodDeclaration: if there is a Vertex that represents the method
+     *          Null: if there isn't a Vertex that represents the method
+     */
     private String methodValidate(ArrayList<Vertex> methods, MethodDeclaration method) {
         String[] splitSignature;
         String[] splitVertex;
@@ -353,9 +435,14 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         return null;
     }
 
-    private void createRepositoryStubClass(ArrayList<Vertex> methodVertices, String idVertexDestMicro, ClassOrInterfaceDeclaration srcClass) {
+    /**
+     * This method creates the Repository Stub Classes of the repositories located in other microservices
+     * @param methodVertices: represents the methods Vertices (of other microservice) that are called from one method of the microservice
+     * @param idMethodVertex: represents the id of the method vertex that calls the methods vertices
+     */
+    private void createRepositoryStubClasses(ArrayList<Vertex> methodVertices, String idMethodVertex) {
         ArrayList<Vertex> createdParents = new ArrayList<>();
-        Vertex vertexDestMicro = graph.getNodeByNodeId(idVertexDestMicro);
+        Vertex vertexDestMicro = graph.getNodeByNodeId(idMethodVertex);
         for (Vertex methodVertex : methodVertices) {
             Vertex parent = graph.getParentByMethodId(methodVertex.getId());
             if (!createdParents.contains(parent) && parent != null) {
@@ -428,6 +515,12 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         }
     }
 
+    /**
+     * This method gives the method REST call type when exposing a repository depending on the name of the method and this reference:
+     * https://github.com/spring-projects/spring-data-rest/blob/main/src/main/asciidoc/repository-resources.adoc
+     * @param method: represents the MethodDeclaration of the repository which has the methods to expose
+     * @return The REST call type required to call the method
+     */
     private String getMethodCallType(MethodDeclaration method) {
         String callType = "";
 
@@ -452,6 +545,12 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         return callType;
     }
 
+    /**
+     * This method creates the body of the method that is going to do a REST call to a Repository in another microservice
+     * @param oldMethod: represents the MethodDeclaration of the method in the repository that is going to be called
+     * @param newMethod: represents the MethodDeclaration of the method that is going to call the oldMethod
+     * @param callType: represents the type of the REST call from the newMethod to the oldMethod
+     */
     private void createBody(MethodDeclaration oldMethod, MethodDeclaration newMethod, String callType) {
         BlockStmt tryStatement = new BlockStmt();
         NodeList<CatchClause> catchClauses = new NodeList<>();
@@ -519,6 +618,11 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         newMethod.setBody(new BlockStmt().addStatement(new TryStmt().setTryBlock(tryStatement).setCatchClauses(catchClauses)));
     }
 
+    /**
+     * This method gives the String with the parameters required to do the REST call
+     * @param method: represents the method which is going to be called
+     * @return A String with the parameters in the correct structure for the REST call
+     */
     private String getStringUrlParameters(MethodDeclaration method) {
         String string = "?";
         for (Parameter parameter : method.getParameters()) {
@@ -532,7 +636,14 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         return string.substring(0, string.length() - 1);
     }
 
-    private boolean equalsMethod(MethodDeclaration method, Vertex m) {
+    /**
+     * This method indicates if a MethodDeclaration is equals to a method Vertex
+     * @param method: represents the MethodDeclaration to compare
+     * @param methodVertex: represents the method Vertex to compare
+     * @return  True: The inputs are the same
+     *          False: The inputs are different
+     */
+    private boolean equalsMethod(MethodDeclaration method, Vertex methodVertex) {
         String[] splitSignature;
         String[] splitVertex;
         String[] parameterSignature;
@@ -544,7 +655,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         } else {
             parameterSignature = null;
         }
-        splitVertex = m.getName().split("\\(|\\)");
+        splitVertex = methodVertex.getName().split("\\(|\\)");
         nameVertex = splitVertex[0].split("\\.")[1];
         if (splitVertex.length > 1) {
             parameterVertex = splitVertex[1].split(",");
@@ -575,11 +686,16 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         return result;
     }
 
-    public void generateExposedRepository(Vertex vertex, String srcPath, String dstPath) {
-
-        String exposedClass = "";
-        String result = "";
+    /**
+     * This method generates the exposed repository in the microservice, adding required imports and annotations
+     * @param repoVertex: represents the vertex of the repository in the graph
+     * @param srcPath: represents the path of the original repository file
+     * @param dstPath: represents the path where the repository is going to be generated
+     */
+    public void generateExposedRepository(Vertex repoVertex, String srcPath, String dstPath) {
+        
         try {
+            String exposedClass = "";
             CompilationUnit cuRepo = StaticJavaParser.parse(new File(srcPath));
             String import1 = "org.springframework.data.rest.core.annotation.RepositoryRestResource";
             String annotation = "RepositoryRestResource";
@@ -587,7 +703,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
             List<ClassOrInterfaceDeclaration> classes = cuRepo.findAll(ClassOrInterfaceDeclaration.class);
 
             for (ClassOrInterfaceDeclaration cd : classes) {
-                if (cd.getNameAsString().equals(vertex.getName())) {
+                if (cd.getNameAsString().equals(repoVertex.getName())) {
                     NodeList<MemberValuePair> aux = new NodeList<>();
                     aux.add(new MemberValuePair("path", StaticJavaParser.parseExpression("\"interface\"")));
                     cd.addAnnotation(new NormalAnnotationExpr(new Name(annotation), aux));
@@ -596,17 +712,6 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
                 }
             }
 
-            /*NodeList<ImportDeclaration> imports = cuRepo.getImports();
-            for (ImportDeclaration aImport : imports) {
-                if (aImport.getNameAsString().contains(exposedClass)) {
-                    result = aImport.getNameAsString();
-                }
-            }
-
-            if (result.equals("")) {
-                result = vertex.getPackageName() + "." + exposedClass;
-            }*/
-
             this.fileUtilsProject.saveCompilationUnit(cuRepo, dstPath);
 
         } catch (Exception ex) {
@@ -614,6 +719,11 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
         }
     }
 
+    /**
+     * This method generates the exposed configuration required for the exposed repositories
+     * @param imports: represents a Set with the imports of the required classes to expose
+     * @param microName: represents the microservice name where it is going to be generated
+     */
     public void generateExposedConfiguration(Set<String> imports, String microName) {
 
         if (!imports.isEmpty()) {

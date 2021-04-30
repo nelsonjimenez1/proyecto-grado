@@ -23,7 +23,7 @@ public class Main {
                 }
                 properties.store(new FileOutputStream(f), null);
                 if (Integer.parseInt(args[2]) > 2222) {
-                    ParitionCotroller c = new ParitionCotroller(args[2]);
+                    PartitionCotroller c = new PartitionCotroller(args[2]);
                     System.out.println("--------------------------------------");
                     System.out.println("Transformation Finished");
                     System.out.println("--------------------------------------");

@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.javeriana.edu.co;
+package com.javeriana.edu.co.Generation;
 
+import com.javeriana.edu.co.Graph.Vertex;
+import com.javeriana.edu.co.Graph.Graph;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -23,7 +24,7 @@ import com.github.javaparser.ast.stmt.CatchClause;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.TypeParameter;
-import com.javeriana.edu.co.Utils.FileUtilsProject;
+import com.javeriana.edu.co.Creation.CreateProjectMicroWeb;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -36,8 +37,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author PC
+ * Generate services java files, controllers java files and  WebServer java file of the project microservice web
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
  */
 public class JavaGeneratorWeb extends JavaGenerator{
 
@@ -45,7 +49,13 @@ public class JavaGeneratorWeb extends JavaGenerator{
         super(graph);
     }
 
-    
+    /**
+     * Generate all services java files of each microservice, the method obtain all vertex controllers of each microservices of the graph, 
+     * then call the function addMethodsService for each microservice of controllers variable, to fill up the new service java file 
+     * of the project microservice web
+     *
+     * @throws FileNotFoundException
+     */
     public void generateServices() {
         HashMap<String, ArrayList<Vertex>> controllers = graph.getControllers();
         String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
@@ -73,6 +83,14 @@ public class JavaGeneratorWeb extends JavaGenerator{
         }
     }
 
+    /**
+     * Create the cuController the CompilationUnit for each Vertex of controllers param, 
+     * then call the function createMethodService for each mehtod of cuController
+     *
+     * @param classWebService The {@link ClassOrInterfaceDEclaration} where we want to generate our class
+     * @param controllers an instance of {@link ArrayList<Vertex>} representing all controllers of a microservice
+     * @throws FileNotFoundException
+     */
     private void addMethodsService(ClassOrInterfaceDeclaration classWebService, List<Vertex> controllers) {
         for (Vertex controller : controllers) {
             try {
@@ -93,6 +111,13 @@ public class JavaGeneratorWeb extends JavaGenerator{
         }
     }
 
+    /**
+     * Fill up the newMethod param with the oldMethod param and cuController param
+     *
+     * @param oldMethod The {@link MethodDeclaration}
+     * @param newMethod The {@link MethodDeclaration}
+     * @param cuController an instance of {@link CompilationUnit} representing a controller java file
+     */
     private void createMethodService(MethodDeclaration oldMethod, MethodDeclaration newMethod, CompilationUnit cuController) {
         newMethod.setType(getReturnTypeMethod(oldMethod));
 
@@ -202,6 +227,12 @@ public class JavaGeneratorWeb extends JavaGenerator{
         newMethod.setBody(new BlockStmt().addStatement(new TryStmt().setTryBlock(tryStatement).setCatchClauses(catchClauses)));
     }
 
+    /**
+     * Get the parameter type of a parameter of MethodDeclaration, the parameter contains the annotation RequestBody 
+     *
+     * @param method The {@link MethodDeclaration}
+     * @return an instance of {@String} representing the parameter type
+     */
     @Override
     public String getPostParameterType(MethodDeclaration method) {
         String string = "";
@@ -215,6 +246,12 @@ public class JavaGeneratorWeb extends JavaGenerator{
         return string;
     }
 
+    /**
+     * Get the variable name of a parameter of MethodDeclaration, the parameter contains the annotation RequestBody 
+     *
+     * @param method The {@link MethodDeclaration}
+     * @return an instance of {@String} representing the variable name
+     */
     @Override
     public String getPostParameter(MethodDeclaration method) {
         String string = "";
@@ -228,6 +265,12 @@ public class JavaGeneratorWeb extends JavaGenerator{
         return string;
     }
 
+    /**
+     * Fill up the newMethod param with  the parameters of oldMethod param
+     *
+     * @param oldMethod The {@link MethodDeclaration}
+     * @param newMethod The {@link MethodDeclaration}
+     */
     private void setParameters(MethodDeclaration oldMethod, MethodDeclaration newMethod) {
         for (Parameter parameter : oldMethod.getParameters()) {
             Parameter aux = parameter.clone();
@@ -236,6 +279,12 @@ public class JavaGeneratorWeb extends JavaGenerator{
         }
     }
 
+    /**
+     * Get the variable name of all parameters of MethodDeclaration, the parameter contains the annotation PathVariable 
+     *
+     * @param method The {@link MethodDeclaration}
+     * @return an instance of {@String} representing all the variables names
+     */
     @Override
     public String getStringGetParameters(MethodDeclaration method) {
         String string = "";
@@ -249,6 +298,12 @@ public class JavaGeneratorWeb extends JavaGenerator{
         return string;
     }
 
+    /**
+     * Get the return type of MethodDeclaration without ResponseEntity string
+     *
+     * @param method The {@link MethodDeclaration}
+     * @return an instance of {@String} representing the return type
+     */
     private String getReturnTypeMethod(MethodDeclaration method) {
         String returnType = method.getTypeAsString();
         if (returnType.contains("ResponseEntity")) {
@@ -257,6 +312,12 @@ public class JavaGeneratorWeb extends JavaGenerator{
         return returnType;
     }
 
+    /**
+     * Get the value of the annotation RequestMapping of the CompilationUnit
+     *
+     * @param cu The {@link CompilationUnit} representing the class controller
+     * @return an instance of {@String} representing the value of the annotation RequestMapping
+     */
     private String getUrlController(CompilationUnit cu) {
         String url = "";
         for (AnnotationExpr annotation : cu.findAll(ClassOrInterfaceDeclaration.class).get(0).getAnnotations()) {
@@ -278,6 +339,13 @@ public class JavaGeneratorWeb extends JavaGenerator{
         return url;
     }
 
+    /**
+     * Generate all controllers java files of each microservice, the method obtain all vertex controllers of each microservices of the graph, 
+     * then call the function addMethodsController for each microservice of controllers variable, to fill up the new controller java file 
+     * of the project microservice web and call the function modifyWebServer for each microservice of controllers variable
+     *
+     * @throws FileNotFoundException
+     */
     public void generateControllers() {
         HashMap<String, ArrayList<Vertex>> controllers = graph.getControllers();
         String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
@@ -312,6 +380,14 @@ public class JavaGeneratorWeb extends JavaGenerator{
         deleteOldTemplates();
     }
 
+    /**
+     * Create the cuController the CompilationUnit for each Vertex of controllers param, 
+     * then call the function createMethodController for each mehtod of cuController
+     *
+     * @param classWebController The {@link ClassOrInterfaceDEclaration} where we want to generate our class
+     * @param controllers an instance of {@link ArrayList<Vertex>} representing all controllers of a microservice
+     * @throws FileNotFoundException
+     */
     private void addMethodsController(ClassOrInterfaceDeclaration classWebController, ArrayList<Vertex> controllers) {
         for (Vertex controller : controllers) {
             try {
@@ -333,6 +409,13 @@ public class JavaGeneratorWeb extends JavaGenerator{
         }
     }
 
+    /**
+     * Fill up the newMethod param with the oldMethod param and urlController param
+     *
+     * @param methodController The {@link MethodDeclaration}
+     * @param methodWebController The {@link MethodDeclaration}
+     * @param urlController an instance of {@link String} representing the value of the annotation RequestMapping
+     */
     private void createMethodController(MethodDeclaration methodController, MethodDeclaration methodWebController, String urlController) {
 
         methodWebController.setType(methodController.getType());
@@ -382,6 +465,12 @@ public class JavaGeneratorWeb extends JavaGenerator{
         methodWebController.setBody(new BlockStmt().addStatement(StaticJavaParser.parseStatement(string)).addStatement(StaticJavaParser.parseStatement(string2)).addStatement(new TryStmt().setTryBlock(tryStatement).setCatchClauses(catchClauses)).addStatement(new ReturnStmt(stringReturn)));
     }
 
+    /**
+     * Get the variable name of all parameters of MethodDeclaration
+     *
+     * @param method The {@link MethodDeclaration}
+     * @return an instance of {@String} representing all the variables names
+     */
     private String getStringParametersController(MethodDeclaration method) {
         String string = "";
         int cont = 0;
@@ -398,6 +487,12 @@ public class JavaGeneratorWeb extends JavaGenerator{
         return string;
     }
     
+    /**
+     * Generate the method of WebServer java file, calling the function createNewWebMethodService and createNewWebMethodController
+     *
+     * @param nameMicroservice The {@link String} 
+     * @throws FileNotFoundException
+     */
     private void modifyWebServer(String nameMicroService){
         String serviceURL = "SERVICE_URL"; 
         String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
@@ -425,6 +520,14 @@ public class JavaGeneratorWeb extends JavaGenerator{
         }
     }
     
+    /**
+     * Fill up the newMethodService param with the oldMethodService param, nameMicroService param and url param
+     *
+     * @param oldMethodService The {@link MethodDeclaration}
+     * @param newMethodService The {@link MethodDeclaration}
+     * @param nameMicroService The {@link String}
+     * @param url an instance of {@link String} representing the value of the annotation RequestMapping
+     */
     private void createNewWebMethodService(MethodDeclaration oldMethodService, MethodDeclaration newMethodService, String nameMicroService, String url){
         String name = "Web" + nameMicroService.substring(0,1).toUpperCase() +nameMicroService.substring(1,nameMicroService.length())+ "Service";  
         newMethodService.setType(name);
@@ -434,6 +537,14 @@ public class JavaGeneratorWeb extends JavaGenerator{
         newMethodService.setBody(body); 
     }
     
+    /**
+     * Fill up the newMethodController param with the oldMethodController param, nameMicroService param and nameService param
+     *
+     * @param oldMethodService The {@link MethodDeclaration}
+     * @param newMethodService The {@link MethodDeclaration}
+     * @param nameMicroService The {@link String}
+     * @param nameService the {@link String} representing the name of service java file
+     */
     private void createNewWebMethodController(MethodDeclaration oldMethodController, MethodDeclaration newMethodController, String nameMicroService, String nameService){
         String name = "Web" + nameMicroService.substring(0,1).toUpperCase() +nameMicroService.substring(1,nameMicroService.length()) +"Controller";  
         newMethodController.setType(name);
@@ -443,6 +554,11 @@ public class JavaGeneratorWeb extends JavaGenerator{
         newMethodController.setBody(body); 
     }
     
+    /**
+     * Delete the template method of WebServer java file
+     *
+     * @throws FileNotFoundException
+     */
     private void deleteOldMethodsWebServer(){
         String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
         String pathGeneric = String.join(File.separator, split) + File.separator;
@@ -460,6 +576,11 @@ public class JavaGeneratorWeb extends JavaGenerator{
         }
     }
     
+    /**
+     * Delete the template WebController java file and WebService java file
+     * of the project microservice web
+     *
+     */
     private void deleteOldTemplates(){
         String[] split = {"output", "microservices-web", "src", "main", "java", "io", "pivotal", "microservices", "services", "web"};
         String pathGeneric = String.join(File.separator, split) + File.separator;
@@ -471,6 +592,10 @@ public class JavaGeneratorWeb extends JavaGenerator{
         fileService.delete();
     }
     
+    /**
+     * Move all entities java files to the project microservice web
+     *
+     */
     public void moveEntities() {
         try {
             Properties properties = new Properties();

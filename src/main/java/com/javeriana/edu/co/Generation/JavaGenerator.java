@@ -1,5 +1,6 @@
-package com.javeriana.edu.co;
+package com.javeriana.edu.co.Generation;
 
+import com.javeriana.edu.co.Graph.Graph;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
