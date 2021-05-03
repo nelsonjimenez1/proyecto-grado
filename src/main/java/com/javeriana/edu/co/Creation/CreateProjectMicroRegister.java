@@ -3,6 +3,7 @@ package com.javeriana.edu.co.Creation;
 
 import com.javeriana.edu.co.Utils.FileUtilsProject;
 import java.io.File;
+import org.apache.commons.io.FileUtils;
 
 /**
  * This class creates the microservice register
@@ -20,12 +21,12 @@ public class CreateProjectMicroRegister {
     public CreateProjectMicroRegister()
     {   
         this.utils = new FileUtilsProject();
-        this.copyFolder();  
     }
+    
     /**
      * Allows copying files and folders from the register template
      */
-    private void copyFolder() {
+    public void copyFolder() {
       
         String[] split = {System.getProperty("user.dir"),"templates","microservices-register"};
         String path = String.join(File.separator, split);

@@ -44,7 +44,10 @@ import java.util.logging.Logger;
  * @author Gustavo Antonio Rivera Delgado
  */
 public class JavaGeneratorWeb extends JavaGenerator{
-
+    public JavaGeneratorWeb() {
+        super();
+    }
+    
     public JavaGeneratorWeb(Graph graph) {
         super(graph);
     }

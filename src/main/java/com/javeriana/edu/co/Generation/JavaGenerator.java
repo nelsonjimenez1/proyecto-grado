@@ -18,6 +18,10 @@ public class JavaGenerator {
     public String rootInput;
     public FileUtilsProject fileUtilsProject;
 
+    public JavaGenerator() {
+        this.fileUtilsProject = new FileUtilsProject();
+    }
+    
     public JavaGenerator(Graph graph) {
         this.graph = graph;
         Properties properties = new Properties();

@@ -12,6 +12,10 @@ public class CreateProjectMicroWeb {
     private Graph graph;   
     private FileUtilsProject utils;
     private JavaGeneratorWeb generator;
+    
+    public CreateProjectMicroWeb() {
+        this.utils = new FileUtilsProject();
+    }
 
     public CreateProjectMicroWeb(Graph graph) {
         this.graph = graph;

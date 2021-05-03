@@ -43,6 +43,7 @@ public class PartitionCotroller {
     }
 
     private void init() {
+        this.createProjectMicroRegister.copyFolder();
         this.consoleUtils.doMvnPackage("microservices-register");
         this.dockerG.generateDockerFile("microservices-register", 1111);
         this.hashMapMicroservice = new HashMap<>();

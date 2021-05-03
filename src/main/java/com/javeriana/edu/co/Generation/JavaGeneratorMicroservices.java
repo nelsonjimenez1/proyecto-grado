@@ -42,6 +42,10 @@ import java.util.logging.Logger;
  */
 public class JavaGeneratorMicroservices extends JavaGenerator {
 
+    public JavaGeneratorMicroservices() {
+        super();
+    }
+    
     public JavaGeneratorMicroservices(Graph graph) {
         super(graph);
     }

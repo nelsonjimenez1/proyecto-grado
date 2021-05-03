@@ -37,6 +37,10 @@ public class CreateProjectMicroServices {
     public String rootGroupID;
     public Graph graph;
     public Integer port;
+    
+    public CreateProjectMicroServices () {
+        
+    }
 
     public CreateProjectMicroServices(String microName, Graph graph, int port) {
         this.xmlU = new XMLUtils();
