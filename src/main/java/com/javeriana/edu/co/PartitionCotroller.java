@@ -66,6 +66,11 @@ public class PartitionCotroller {
             this.consoleUtils.doMvnPackage(microName);
             this.dockerG.generateDockerFile(microName, portGeneric);
             portGeneric++;
+            
+            System.out.println("--------------------------------------");
+            System.out.println("microservice: " + microName + " construction finished");
+            System.out.println("--------------------------------------");
+            
         }
     }
 }

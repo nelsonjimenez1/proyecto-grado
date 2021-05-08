@@ -205,7 +205,7 @@ public class Graph {
 
         Collection<Vertex> nodesAux = this.getAllNodes();
         for (Vertex node : nodesAux) {
-            if (node.getMicroservice().equals(microService) && node.getSubType().equalsIgnoreCase("entity")) {
+            if (node.getMicroservice().equals(microService) && node.getType().equalsIgnoreCase("Class") && node.getSubType().equalsIgnoreCase("entity")) {
                 exposedImports.add(node.getPackageName() +  "." + node.getName());
             }
         }
