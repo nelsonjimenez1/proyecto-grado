@@ -31,7 +31,7 @@ public class JavaGeneratorWebTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("CP15")
     public void testGetPostParameterType() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "TestMethod.java";
         try {
@@ -51,7 +51,7 @@ public class JavaGeneratorWebTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("CP16")
     public void testGetPostParameter() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "TestMethod.java";
         try {
@@ -71,7 +71,7 @@ public class JavaGeneratorWebTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("CP17")
     public void testGetStringGetParameters() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "TestMethod.java";
         try {
@@ -91,7 +91,7 @@ public class JavaGeneratorWebTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("CP18")
     public void testGetReturnTypeMethod() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "TestMethod.java";
         try {
@@ -111,7 +111,7 @@ public class JavaGeneratorWebTest {
     }
 
     @Test
-    @DisplayName("duda")
+    @DisplayName("CP19")
     public void testGetStringParametersController() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "TestMethod.java";
         try {
@@ -119,7 +119,7 @@ public class JavaGeneratorWebTest {
             String parametersController = javaGeneratorWeb.getUrlController(cu);
             System.out.println(parametersController);
             boolean sw = false;
-            if (parametersController.equals("\"/api\"")) {
+            if (parametersController.equals("/api")) {
                 sw = true;
             }
             assertEquals(true, sw);

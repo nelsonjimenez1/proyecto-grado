@@ -26,7 +26,7 @@ public class CreateProjectMicroServicesTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("CP02")
     public void testListDirectory() {
         ArrayList<File> listDirectory = createProjectMicroServices.listDirectory(System.getProperty("user.dir") + File.separator + "src");
         String[] array = {"main", "test"};
@@ -49,7 +49,7 @@ public class CreateProjectMicroServicesTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("CP03")
     public void testCreateFiles() {
         ArrayList<String> rootList = new ArrayList<>();
         String path1 = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "test1.txt";
@@ -67,7 +67,7 @@ public class CreateProjectMicroServicesTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("CP04")
     public void testConcatV() {
         String[] array1 = {"left", "left"};
         String[] array2 = {"rigth", "right"};
@@ -90,7 +90,7 @@ public class CreateProjectMicroServicesTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("CP05")
     public void testWriteFile() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "test1.txt";
         String line = "";

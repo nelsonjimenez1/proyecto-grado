@@ -26,7 +26,7 @@ public class DockerGeneratorTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("CP07")
     public void testWrite() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "test3.txt";
         String line = "";

@@ -31,7 +31,7 @@ public class JavaGeneratorMicroservicesTest {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("CP08")
     public void testGetMethodCallType() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "Repository.java";
         try {
@@ -50,8 +50,9 @@ public class JavaGeneratorMicroservicesTest {
         }
     }
 
+    //duda
     @Test
-    @DisplayName("duda")
+    @DisplayName("CP09")
     public void testGetStringUrlParameters() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "Repository.java";
         try {

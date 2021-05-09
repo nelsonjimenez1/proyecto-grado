@@ -30,7 +30,7 @@ public class JavaGeneratorTest {
     }
     
     @Test
-    @DisplayName("")
+    @DisplayName("CP10")
     public void testConcatV() {
         String[] array1 = {"left", "left"};
         String[] array2 = {"rigth", "right"};
@@ -53,7 +53,7 @@ public class JavaGeneratorTest {
     }
     
     @Test
-    @DisplayName("")
+    @DisplayName("CP11")
     public void testGetPostParameterType() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "Repository.java";
         try {
@@ -73,7 +73,7 @@ public class JavaGeneratorTest {
     }
     
     @Test
-    @DisplayName("")
+    @DisplayName("CP12")
     public void testGetPostParameter() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "Repository.java";
         try {
@@ -93,7 +93,7 @@ public class JavaGeneratorTest {
     }
     
     @Test
-    @DisplayName("")
+    @DisplayName("CP13")
     public void testGetReturnTypeClass() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "TestMethod.java";
         try {
@@ -114,7 +114,7 @@ public class JavaGeneratorTest {
     }
     
     @Test
-    @DisplayName("")
+    @DisplayName("CP14")
     public void testGetStringGetParameters() {
         String path = System.getProperty("user.dir") + File.separator + "tests" + File.separator + "Repository.java";
         try {

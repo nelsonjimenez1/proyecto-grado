@@ -22,7 +22,7 @@ public class CreateProjectMicroWebTest {
     }
     
     @Test
-    @DisplayName("")
+    @DisplayName("CP06")
     public void testCopyFolder() {
         createProjectMicroWeb.copyFolder();
         assertEquals(true, new File("output","microservices-web").exists());

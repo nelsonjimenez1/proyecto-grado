@@ -339,7 +339,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
                     NodeList<MemberValuePair> pairs = annotationNormal.getPairs();
                     for (MemberValuePair pair : pairs) {
                         if (pair.getName().toString().equalsIgnoreCase("Value")) {
-                            url = pair.getValue().toString();
+                            url = pair.getValue().toString().split("\"")[1];
                         }
                     }
                 } else if (annotation instanceof SingleMemberAnnotationExpr) {
