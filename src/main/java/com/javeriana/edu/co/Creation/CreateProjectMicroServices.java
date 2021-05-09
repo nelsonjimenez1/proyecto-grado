@@ -283,6 +283,8 @@ public class CreateProjectMicroServices {
         String destinyPath = String.join(File.separator, dest);
         destinyPath += File.separator + main.getName() + ".java";
         this.generator.modifyMain(originPath, destinyPath);
+        
+        boolean needExpose = false;
 
         for (Vertex vertex : list) {
             if (!vertex.getId().equals(main.getId())) {
@@ -307,14 +309,15 @@ public class CreateProjectMicroServices {
                     }
                     if (vertex.getSubType().equalsIgnoreCase("Repository") && graph.needExpose(vertex.getId())) {
                         destinyPath += File.separator + vertex.getName() + ".java";
+                        needExpose = true;
                         this.generator.generateExposedRepository(vertex, originPath, destinyPath);
                     }
                 }
             }
         }
         
-        
-        this.generator.generateExposedConfiguration(this.graph.getEntitiesByMicroservice(this.microName), this.microName);
+        if (needExpose)
+            this.generator.generateExposedConfiguration(this.graph.getEntitiesByMicroservice(this.microName), this.microName);
     }
 
     public String[] concatV(String[] left, String[] right) {

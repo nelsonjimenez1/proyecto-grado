@@ -152,7 +152,15 @@ public class JavaGeneratorWeb extends JavaGenerator{
             } else if (annotation.getName().toString().toUpperCase().contains("POST")) {
 
                 String controllerUrl = getUrlController(cuController);
-                String url = controllerUrl + annotation.toString().split("value")[1].split("\"")[1];
+                
+                String postUrl = "";
+                if(annotation.toString().split("value").length > 1) {
+                    postUrl = annotation.toString().split("value")[1];
+                } else {                    
+                    postUrl = ((SingleMemberAnnotationExpr)annotation).getMemberValue().toString();
+                }
+                
+                String url = controllerUrl + postUrl.split("\"")[1];
                 String returnType = getReturnTypeClass(oldMethod);
                 String parameters = getStringGetParameters(oldMethod);
                 String postParameter = getPostParameter(oldMethod);
