@@ -27,7 +27,7 @@ public class CreateProjectMicroWeb {
         this.generator.moveEntities();
     }
 
-    private void copyFolder() {
+    public void copyFolder() {
         String[] split = {System.getProperty("user.dir"), "templates", "microservices-web"};
         String path = String.join(File.separator, split);
         String[] splitMicro = {System.getProperty("user.dir"), "output"};

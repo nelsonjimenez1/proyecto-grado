@@ -525,7 +525,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
      * @param method: represents the MethodDeclaration of the repository which has the methods to expose
      * @return The REST call type required to call the method
      */
-    private String getMethodCallType(MethodDeclaration method) {
+    public String getMethodCallType(MethodDeclaration method) {
         String callType = "";
 
         if (method.getNameAsString().equals("findAll") || method.getNameAsString().equals("findByID")) {
@@ -627,7 +627,7 @@ public class JavaGeneratorMicroservices extends JavaGenerator {
      * @param method: represents the method which is going to be called
      * @return A String with the parameters in the correct structure for the REST call
      */
-    private String getStringUrlParameters(MethodDeclaration method) {
+    public String getStringUrlParameters(MethodDeclaration method) {
         String string = "?";
         for (Parameter parameter : method.getParameters()) {
             for (AnnotationExpr annotation : parameter.getAnnotations()) {

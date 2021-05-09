@@ -307,7 +307,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
      * @param method The {@link MethodDeclaration}
      * @return an instance of {@String} representing the return type
      */
-    private String getReturnTypeMethod(MethodDeclaration method) {
+    public String getReturnTypeMethod(MethodDeclaration method) {
         String returnType = method.getTypeAsString();
         if (returnType.contains("ResponseEntity")) {
             returnType = returnType.substring(15, returnType.length() - 1);
@@ -321,7 +321,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
      * @param cu The {@link CompilationUnit} representing the class controller
      * @return an instance of {@String} representing the value of the annotation RequestMapping
      */
-    private String getUrlController(CompilationUnit cu) {
+    public String getUrlController(CompilationUnit cu) {
         String url = "";
         for (AnnotationExpr annotation : cu.findAll(ClassOrInterfaceDeclaration.class).get(0).getAnnotations()) {
             if (annotation.toString().contains("RequestMapping")) {

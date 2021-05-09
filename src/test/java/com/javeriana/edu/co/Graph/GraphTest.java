@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,13 +28,21 @@ public class GraphTest {
     @Test
     @DisplayName("")
     public void testGetEdgesSameMicroserviceBySrcNodeId() {
-
+        boolean sw = false;
+        ArrayList<Edge> edgesSameMicroserviceBySrcNodeId = graph.getEdgesSameMicroserviceBySrcNodeId("owner.org.springframework.samples.petclinic.owner.OwnerController", "owner");
+        if (edgesSameMicroserviceBySrcNodeId.size() == 9) {
+            sw = true;
+        }
+        
+        assertEquals(true, sw);
     }
    
     @Test
     @DisplayName("")
     public void testGetNodeMethodsBySrcNodeId() {
-        
+        boolean sw = false;
+        ArrayList<Vertex> nodeMethodsBySrcNodeId = graph.getNodeMethodsBySrcNodeId("owner.org.springframework.samples.petclinic.owner.OwnerRepository");
+        System.out.println("ayuda" + nodeMethodsBySrcNodeId.size());
     }
 
     @Test
