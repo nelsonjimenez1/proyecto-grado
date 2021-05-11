@@ -25,7 +25,7 @@ public class CreateProjectMicroRegisterTest {
     }
    
     @Test
-    @DisplayName("")
+    @DisplayName("CP01")
     public void testCopyFolder() {
         createProjectMicroRegister.copyFolder();
         assertEquals(true, new File("output","microservices-register").exists());

@@ -174,7 +174,7 @@ public class CreateProjectMicroServices {
         copyAnotherDirectory(pathOne, pathTwo);
     }
 
-    private void copyAnotherDirectory(String origin, String destiny) {
+    public void copyAnotherDirectory(String origin, String destiny) {
         File from = new File(origin);
         File to = new File(destiny);
 
@@ -210,7 +210,7 @@ public class CreateProjectMicroServices {
         System.out.println("Auxiliary folders created");
     }
 
-    private ArrayList<File> listDirectory(String dirName) {
+    public ArrayList<File> listDirectory(String dirName) {
         ArrayList<File> listFilesOrigin = new ArrayList<>();
         File f = new File(dirName);
         try {
@@ -236,7 +236,7 @@ public class CreateProjectMicroServices {
         }
     }
 
-    private void createFiles(ArrayList<String> rootList) {
+    public void createFiles(ArrayList<String> rootList) {
         for (String root : rootList) {
             this.createFileByRoot(root);
         }
@@ -283,6 +283,8 @@ public class CreateProjectMicroServices {
         String destinyPath = String.join(File.separator, dest);
         destinyPath += File.separator + main.getName() + ".java";
         this.generator.modifyMain(originPath, destinyPath);
+        
+        boolean needExpose = false;
 
         for (Vertex vertex : list) {
             if (!vertex.getId().equals(main.getId())) {
@@ -307,17 +309,18 @@ public class CreateProjectMicroServices {
                     }
                     if (vertex.getSubType().equalsIgnoreCase("Repository") && graph.needExpose(vertex.getId())) {
                         destinyPath += File.separator + vertex.getName() + ".java";
+                        needExpose = true;
                         this.generator.generateExposedRepository(vertex, originPath, destinyPath);
                     }
                 }
             }
         }
         
-        
-        this.generator.generateExposedConfiguration(this.graph.getEntitiesByMicroservice(this.microName), this.microName);
+        if (needExpose)
+            this.generator.generateExposedConfiguration(this.graph.getEntitiesByMicroservice(this.microName), this.microName);
     }
 
-    private String[] concatV(String[] left, String[] right) {
+    public String[] concatV(String[] left, String[] right) {
         String[] result = new String[left.length + right.length];
 
         System.arraycopy(left, 0, result, 0, left.length);
@@ -355,7 +358,7 @@ public class CreateProjectMicroServices {
         }
     }
 
-    private void writeFile(File file, String line) {
+    public void writeFile(File file, String line) {
         try {
             if (!file.exists()) {
                 file.createNewFile();

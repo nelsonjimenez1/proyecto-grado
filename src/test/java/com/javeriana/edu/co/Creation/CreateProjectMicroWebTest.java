@@ -5,6 +5,8 @@
  */
 package com.javeriana.edu.co.Creation;
 
+import java.io.File;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +22,9 @@ public class CreateProjectMicroWebTest {
     }
     
     @Test
-    @DisplayName("")
+    @DisplayName("CP06")
     public void testCopyFolder() {
-        
+        createProjectMicroWeb.copyFolder();
+        assertEquals(true, new File("output","microservices-web").exists());
     }
 }

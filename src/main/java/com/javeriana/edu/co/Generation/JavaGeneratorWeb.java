@@ -152,7 +152,15 @@ public class JavaGeneratorWeb extends JavaGenerator{
             } else if (annotation.getName().toString().toUpperCase().contains("POST")) {
 
                 String controllerUrl = getUrlController(cuController);
-                String url = controllerUrl + annotation.toString().split("value")[1].split("\"")[1];
+                
+                String postUrl = "";
+                if(annotation.toString().split("value").length > 1) {
+                    postUrl = annotation.toString().split("value")[1];
+                } else {                    
+                    postUrl = ((SingleMemberAnnotationExpr)annotation).getMemberValue().toString();
+                }
+                
+                String url = controllerUrl + postUrl.split("\"")[1];
                 String returnType = getReturnTypeClass(oldMethod);
                 String parameters = getStringGetParameters(oldMethod);
                 String postParameter = getPostParameter(oldMethod);
@@ -307,7 +315,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
      * @param method The {@link MethodDeclaration}
      * @return an instance of {@String} representing the return type
      */
-    private String getReturnTypeMethod(MethodDeclaration method) {
+    public String getReturnTypeMethod(MethodDeclaration method) {
         String returnType = method.getTypeAsString();
         if (returnType.contains("ResponseEntity")) {
             returnType = returnType.substring(15, returnType.length() - 1);
@@ -321,7 +329,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
      * @param cu The {@link CompilationUnit} representing the class controller
      * @return an instance of {@String} representing the value of the annotation RequestMapping
      */
-    private String getUrlController(CompilationUnit cu) {
+    public String getUrlController(CompilationUnit cu) {
         String url = "";
         for (AnnotationExpr annotation : cu.findAll(ClassOrInterfaceDeclaration.class).get(0).getAnnotations()) {
             if (annotation.toString().contains("RequestMapping")) {
@@ -331,7 +339,7 @@ public class JavaGeneratorWeb extends JavaGenerator{
                     NodeList<MemberValuePair> pairs = annotationNormal.getPairs();
                     for (MemberValuePair pair : pairs) {
                         if (pair.getName().toString().equalsIgnoreCase("Value")) {
-                            url = pair.getValue().toString();
+                            url = pair.getValue().toString().split("\"")[1];
                         }
                     }
                 } else if (annotation instanceof SingleMemberAnnotationExpr) {

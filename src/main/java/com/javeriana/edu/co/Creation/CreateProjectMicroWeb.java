@@ -25,16 +25,18 @@ public class CreateProjectMicroWeb {
         this.generator.generateServices();
         this.generator.generateControllers();
         this.generator.moveEntities();
+                
+        System.out.println("--------------------------------------");
+        System.out.println("microservices-web construction finished");
+        System.out.println("--------------------------------------");
+        
     }
 
-    private void copyFolder() {
+    public void copyFolder() {
         String[] split = {System.getProperty("user.dir"), "templates", "microservices-web"};
         String path = String.join(File.separator, split);
         String[] splitMicro = {System.getProperty("user.dir"), "output"};
         String pathMicro = String.join(File.separator, splitMicro);
         this.utils.copyAnotherDirectory(path, pathMicro);
-        System.out.println("--------------------------------------");
-        System.out.println("microservices-web construction finished");
-        System.out.println("--------------------------------------");
     }  
 }
