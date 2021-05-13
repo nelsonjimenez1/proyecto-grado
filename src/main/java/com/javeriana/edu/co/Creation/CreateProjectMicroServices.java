@@ -27,6 +27,15 @@ import org.w3c.dom.Node;
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.NodeList;
 
+/**
+ * This class creates the n microservices with the necessary files generating
+ * and copying.
+ *
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
+ */
 public class CreateProjectMicroServices {
 
     public String groupID;
@@ -37,11 +46,23 @@ public class CreateProjectMicroServices {
     public String rootGroupID;
     public Graph graph;
     public Integer port;
-    
-    public CreateProjectMicroServices () {
-        
+
+    /**
+     * Contructor
+     */
+    public CreateProjectMicroServices() {
+
     }
 
+    /**
+     * Contructor 
+     * In this costructor, class attributes are initialized to be
+     * used in this class functions.
+     *
+     * @param microName name for the microservice to going to be created
+     * @param graph class with the Graph information
+     * @param port port number used for microservice creation
+     */
     public CreateProjectMicroServices(String microName, Graph graph, int port) {
         this.xmlU = new XMLUtils();
         Properties properties = new Properties();
@@ -60,6 +81,9 @@ public class CreateProjectMicroServices {
         }
     }
 
+    /**
+     * This method calls the other class functions for the microservice creation.
+     */
     private void init() {
         System.out.println("--------------------------------------");
         System.out.println("creating project for " + this.microName);
@@ -77,6 +101,10 @@ public class CreateProjectMicroServices {
         System.out.println("--------------------------------------");
     }
 
+    /**
+     * This method creates the microservice basic folders and places them in the right
+     * position.
+     */
     public void createBasicFolders() {
         String[] folders = {this.microName, "src", "main"};
         String[] subFolders = {"java", "resources"};
@@ -99,6 +127,10 @@ public class CreateProjectMicroServices {
         System.out.println("basic folders created");
     }
 
+    /**
+     * This method creates the microservice groupID folders and places them in the right
+     * position.
+     */
     public void createFolderGroupID() {
 
         String[] split = groupID.split("\\.");
@@ -122,6 +154,11 @@ public class CreateProjectMicroServices {
         System.out.println("groupId folder created");
     }
 
+    /**
+     * This method generates the microservice POM.xml file and places it in the right
+     * location.
+     *
+     */
     public void createPOM() {
         String[] splitPath = {System.getProperty("user.dir"), "templates", "pom.xml"};
         String path = String.join(File.separator, splitPath);
@@ -137,6 +174,12 @@ public class CreateProjectMicroServices {
         System.out.println("POM file created");
     }
 
+    /**
+     * This method extract the necessary dependencies from a template to copy them into the
+     * POM.xml file.
+     *
+     * @param dOuput represent the microservice POM.xml file
+     */
     public void addDependencies(Document dOutput) {
         Document dInput = xmlU.openXMLFile(rootInput + File.separator + "pom.xml");
         ArrayList<Node> nodos = xmlU.readXMLNodes(dInput, "/project/dependencies/dependency");
@@ -146,6 +189,12 @@ public class CreateProjectMicroServices {
         }
     }
 
+    /**
+     * This method extract the necessary plugins from a template to copy them into the
+     * POM.xml file.
+     *
+     * @param dOuput represent the microservice POM.xml file
+     */
     public void addPlugins(Document dOutput) {
         Document dInput = xmlU.openXMLFile(rootInput + File.separator + "pom.xml");
         ArrayList<Node> nodos = xmlU.readXMLNodes(dInput, "/project/plugins/plugin");
@@ -155,6 +204,12 @@ public class CreateProjectMicroServices {
         }
     }
 
+    /**
+     * This method gets original groupID and artifactID and modifies to update in
+     * microservice POM.xml file.
+     *
+     * @param dOuput represent the microservice POM.xml file
+     */
     private void updateGroupId_ArtifactID(Document dOutput) {
         Document dInput = xmlU.openXMLFile(rootInput + File.separator + "pom.xml");
         ArrayList<Node> nodoGroupId = xmlU.readXMLNodes(dInput, "/project/groupId");
@@ -166,6 +221,11 @@ public class CreateProjectMicroServices {
         xmlU.insertNode(dOutput, "/project", nodoArtifactID.get(0));
     }
 
+    /**
+     * This method copy the resource folder from the original project and paste it into the
+     * microservice
+     *
+     */
     private void createResources() {
         String[] splitOne = {rootInput, "src", "main", "resources"};
         String pathOne = String.join(File.separator, splitOne);
@@ -174,6 +234,13 @@ public class CreateProjectMicroServices {
         copyAnotherDirectory(pathOne, pathTwo);
     }
 
+    /**
+     * This method allows you to copy a folder from a directory into another one.
+     *
+     * @param origin directory location from which the information will be
+     * copied
+     * @param destiny directory location where the information will be pasted
+     */
     public void copyAnotherDirectory(String origin, String destiny) {
         File from = new File(origin);
         File to = new File(destiny);
@@ -185,6 +252,9 @@ public class CreateProjectMicroServices {
         }
     }
 
+    /**
+     * This method allows copying files from a directory into another one.
+     */
     private void copyFile(String origin, String destiny) {
         File from = new File(origin);
         File to = new File(destiny);
@@ -196,6 +266,10 @@ public class CreateProjectMicroServices {
         }
     }
 
+    /**
+     * This method allows copying folders from Original´project main folder directory into
+     * microservice main folder directory.
+     */
     private void copyAuxiliaryFolders() {
         ArrayList<File> list = listDirectory(rootInput + File.separator + "src" + File.separator + "main");
         String[] split = {rootInput, "src", "main"};
@@ -210,6 +284,13 @@ public class CreateProjectMicroServices {
         System.out.println("Auxiliary folders created");
     }
 
+    /**
+     * This method identifies in a directory the files or folders that it has and returns
+     * the files and directories found.
+     *
+     * @param dirName directory path.
+     * @return List of the Directry files.
+     */
     public ArrayList<File> listDirectory(String dirName) {
         ArrayList<File> listFilesOrigin = new ArrayList<>();
         File f = new File(dirName);
@@ -227,6 +308,11 @@ public class CreateProjectMicroServices {
         return listFilesOrigin;
     }
 
+    /**
+     * This method creates in a specific path a new file.
+     *
+     * @param root specific path.
+     */
     private void createFileByRoot(String root) {
         try {
             File directorio = new File(root);
@@ -236,12 +322,20 @@ public class CreateProjectMicroServices {
         }
     }
 
+    /**
+     * This method creates a set of files according to a root list.
+     *
+     * @param rootList root list for the files creation
+     */
     public void createFiles(ArrayList<String> rootList) {
         for (String root : rootList) {
             this.createFileByRoot(root);
         }
     }
 
+    /**
+     * This method generates a set of files based on a specified path.
+     */
     private void generateFiles() {
         ArrayList<String> list = new ArrayList<String>();
         String[] split = {"output", this.microName, "src", "main", "java", rootGroupID, "services", "registration", "RegistrationServer.java"};
@@ -250,10 +344,16 @@ public class CreateProjectMicroServices {
         this.createFiles(list);
     }
 
+    /**
+     * This method adds the RegistrationServer.java class to the microservice project.
+     */
     private void updateRegister() {
         this.generator.addRegisterClass(microName, rootGroupID);
     }
 
+    /**
+     * This method creates folders into microservice groupID folder.
+     */
     private void createFolderAfterGroupID() {
         String[] splitPathDirectory = {this.rootInput, "src", "main", "java", this.rootGroupID};
         String pathDirectory = String.join(File.separator, splitPathDirectory);
@@ -270,6 +370,13 @@ public class CreateProjectMicroServices {
         System.out.println("folders into groupId folder created");
     }
 
+    /**
+     * This method takes the file with the SpringBootApplication notation from the original
+     * project and modifies it to generate the one from the
+     * microservice. Generates the microservice class and the file partition by
+     * javaGeneratormicroservices class and if necessary, generate the class to
+     * expose a repository and its configuration class.
+     */
     private void partitionFiles() {
         ArrayList<Vertex> list = graph.getNodesByMicroservice(microName);
         Vertex main = graph.getMainByMicroservice(microName);
@@ -283,7 +390,7 @@ public class CreateProjectMicroServices {
         String destinyPath = String.join(File.separator, dest);
         destinyPath += File.separator + main.getName() + ".java";
         this.generator.modifyMain(originPath, destinyPath);
-        
+
         boolean needExpose = false;
 
         for (Vertex vertex : list) {
@@ -315,11 +422,19 @@ public class CreateProjectMicroServices {
                 }
             }
         }
-        
-        if (needExpose)
+
+        if (needExpose) {
             this.generator.generateExposedConfiguration(this.graph.getEntitiesByMicroservice(this.microName), this.microName);
+        }
     }
 
+    /**
+     * This method concatenate two string Vectors
+     *
+     * @param left vector that makes up the concatenation left part.
+     * @param rigth vector that makes up the concatenation right part.
+     * @return String vector gererated. 
+     */
     public String[] concatV(String[] left, String[] right) {
         String[] result = new String[left.length + right.length];
 
@@ -329,6 +444,10 @@ public class CreateProjectMicroServices {
         return result;
     }
 
+    /**
+     * This method generates the microservice application.yml file and places it in the
+     * right location.
+     */
     private void createApplicationYML() {
         String[] splitPathDirectory = {"output", microName, "src", "main", "resources", "application.yml"};
         String pathDirectory = String.join(File.separator, splitPathDirectory);
@@ -358,6 +477,11 @@ public class CreateProjectMicroServices {
         }
     }
 
+    /**
+     * This method writes a File with a string received by parameter. If file doesnt exist, the method creates it.
+     * @param file: The file where it will be written.
+     * @param line: The string that will be written.
+     */
     public void writeFile(File file, String line) {
         try {
             if (!file.exists()) {
@@ -370,7 +494,10 @@ public class CreateProjectMicroServices {
             System.out.println(ex.getMessage());
         }
     }
-
+    
+     /**
+     * This method adds properties to the microservice POM.xml file.
+     */
     private void addProperties(Document dOutput) {
         Document dInput = xmlU.openXMLFile(rootInput + File.separator + "pom.xml");
         ArrayList<Node> nodes = xmlU.readXMLNodes(dInput, "/project/properties");

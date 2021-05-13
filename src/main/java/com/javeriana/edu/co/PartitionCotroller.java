@@ -11,8 +11,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * 
- * @author nelso
+ * This class has its attributes,the classes in charge of generating each part
+ * of the microservices application and starts their execution
+ *
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
  */
 public class PartitionCotroller {
 
@@ -27,8 +32,9 @@ public class PartitionCotroller {
     private int portGeneric;
 
     /**
+     * Contructor
      *
-     * @param port
+     * @param port: port number used for microservices creation
      */
     public PartitionCotroller(String port) {
         this.portGeneric = Integer.parseInt(port);
@@ -42,6 +48,13 @@ public class PartitionCotroller {
 
     }
 
+    /**
+     * This method allows start microservie-register, n-microsevices, microservices-web
+     * creation and their dokersfiles
+     *
+     * @param microName the microservice name
+     * @param port port where it will be exposed
+     */
     private void init() {
         this.createProjectMicroRegister.copyFolder();
         this.consoleUtils.doMvnPackage("microservices-register");
@@ -51,11 +64,14 @@ public class PartitionCotroller {
         this.travelArrayMicroservice();
         CreateProjectMicroWeb newMicroWeb = new CreateProjectMicroWeb(this.graph);
         this.consoleUtils.doMvnPackage("microservices-web");
-        this.dockerG.generateDockerFile("microservices-web", 2222); 
+        this.dockerG.generateDockerFile("microservices-web", 2222);
     }
 
     /**
      *
+     * This method reads the name of each of the n microservices and based on them, a port
+     * is assigned, the microservice is created and its respective dockerFile is
+     * generated
      */
     public void travelArrayMicroservice() {
         ArrayList<String> list = graph.getListMicroservices();
@@ -66,11 +82,11 @@ public class PartitionCotroller {
             this.consoleUtils.doMvnPackage(microName);
             this.dockerG.generateDockerFile(microName, portGeneric);
             portGeneric++;
-            
+
             System.out.println("--------------------------------------");
             System.out.println("microservice: " + microName + " construction finished");
             System.out.println("--------------------------------------");
-            
+
         }
     }
 }

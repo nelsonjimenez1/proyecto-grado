@@ -5,8 +5,23 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
+/**
+ * This class has the run file of this tool, taking into account the input
+ * parameters
+ *
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
+ */
 public class Main {
 
+    /**
+     * This method get the imputpath and the group id of the monolith and create
+     * the controller that starts the microservices generation
+     * 
+     * @param args: array containing the input parameters
+     */
     public static void main(String[] args) {
 
         if (args.length > 0) {
@@ -15,7 +30,7 @@ public class Main {
             try {
                 File f = new File(System.getProperty("user.dir") + File.separator + "configuration.properties");
                 properties.load(new FileInputStream(f));
-                if (args[0] != null && args[1] != null && args[2]!= null) {
+                if (args[0] != null && args[1] != null && args[2] != null) {
                     properties.setProperty("INPUTPATH", args[0]);
                     properties.setProperty("GROUPID", args[1]);
                 } else {
@@ -27,8 +42,7 @@ public class Main {
                     System.out.println("--------------------------------------");
                     System.out.println("Transformation Finished");
                     System.out.println("--------------------------------------");
-                }
-                else {
+                } else {
                     throw new Exception("Port parameter must be greater than 2222");
                 }
 

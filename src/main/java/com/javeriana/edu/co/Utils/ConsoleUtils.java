@@ -11,24 +11,41 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
+ * This class allows you make calls by console
  *
- * @author prado
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
  */
 public class ConsoleUtils {
 
+    /**
+     * This method lets run the "mvn package" command
+     * 
+     * @param name: string with a name project.
+     */
     public void doMvnPackage(String name) {
         executeCommand(name, "mvn package");
     }
 
+    /**
+     *
+     * This method allows to run commands on the console
+     * 
+     * @param name: string with a name project.
+     * @param command: instruction for call in console;
+     */
     public void executeCommand(String name, String command) {
         try {
-            
+
             String osName = System.getProperty("os.name");
             String console = "";
-            
-            if(osName.toLowerCase().contains("windows"))
+
+            if (osName.toLowerCase().contains("windows")) {
                 console = "cmd /c ";
-            
+            }
+
             String commandMvn = console + command;
 
             System.out.println("---------------------------------------------------");
@@ -42,6 +59,12 @@ public class ConsoleUtils {
         }
     }
 
+    /**
+     *
+     * This method allows to print the process result of command executing
+     * 
+     * @param process: process result to print.
+     */
     public void printResults(Process process) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line = "";
