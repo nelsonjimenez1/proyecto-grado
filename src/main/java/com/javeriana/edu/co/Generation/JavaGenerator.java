@@ -11,6 +11,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
+/**
+ * This class offers functions for manipulate java code elements.
+ *
+ * @author Nelson David Jimenez Ortiz
+ * @author Santos David Nuñez Villamil
+ * @author Juan Sebastián Prado Valero
+ * @author Gustavo Antonio Rivera Delgado
+ */
 public class JavaGenerator {
 
     public String groupID;
@@ -36,6 +44,12 @@ public class JavaGenerator {
         }
     }
 
+     /**
+     * This method get the keys from a modifiers list.
+     * 
+     * @param modifiers modifiers list.
+     * @return modifier keyword list.
+     */
     public Modifier.Keyword[] getKeywords(NodeList<Modifier> modifiers) {
         Modifier.Keyword[] list = new Modifier.Keyword[modifiers.size()];
         int i = 0;
@@ -45,7 +59,13 @@ public class JavaGenerator {
         }
         return list;
     }
-
+     /**
+     * This method concatenates two string Vectors 
+     * 
+     * @param left vector that makes up the concatenation left part.
+     * @param rigth vector that makes up the concatenation right part.
+     * @return String vector gererated.
+     */
     public String[] concatV(String[] left, String[] right) {
         String[] result = new String[left.length + right.length];
 
@@ -54,7 +74,13 @@ public class JavaGenerator {
 
         return result;
     }
-
+    
+     /**
+     * This method gets the parameter type of a function declaration and return it as a string
+     * 
+     * @param method metod declatation information
+     * @return string with parameter type
+     */
     public String getPostParameterType(MethodDeclaration method) {
         String string = "";
         for (Parameter parameter : method.getParameters()) {
@@ -64,6 +90,12 @@ public class JavaGenerator {
         return string;
     }
 
+     /**
+     * This method gets the parameter of a function declaration and return as a string
+     * 
+     * @param method metod declatation information
+     * @return string with parameter name
+     */
     public String getPostParameter(MethodDeclaration method) {
         String string = "";
         for (Parameter parameter : method.getParameters()) {
@@ -73,6 +105,12 @@ public class JavaGenerator {
         return string;
     }
 
+    /**
+     * This method identifies the return type of a function declaration  and returns the return type class as a String
+     * 
+     * @param method metod declatation information
+     * @return string with return type class
+     */
     public String getReturnTypeClass(MethodDeclaration method) {
 
         String returnType = method.getTypeAsString();
@@ -96,7 +134,12 @@ public class JavaGenerator {
 
         return returnType + ".class";
     }
-
+    /**
+     * This method identifies the return type of a function declaration  and returns the return type class
+     * 
+     * @param method metod declatation information
+     * @return string with parameter name
+     */
     public String getStringGetParameters(MethodDeclaration method) {
         String string = "";
         for (Parameter parameter : method.getParameters()) {
