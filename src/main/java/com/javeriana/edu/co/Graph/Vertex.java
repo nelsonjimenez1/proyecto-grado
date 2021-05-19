@@ -34,7 +34,7 @@ public class Vertex {
         this.microservice = microservice;
     }*/
     /**
-     * Contructor
+     * Constructor
      */
     public Vertex() {
         

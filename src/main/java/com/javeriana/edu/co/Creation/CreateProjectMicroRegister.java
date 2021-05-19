@@ -16,7 +16,7 @@ public class CreateProjectMicroRegister {
     
     private FileUtilsProject utils;
     /**
-     * Contructor
+     * Constructor
      */
     public CreateProjectMicroRegister()
     {   

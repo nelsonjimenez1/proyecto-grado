@@ -21,14 +21,14 @@ public class CreateProjectMicroWeb {
     private JavaGeneratorWeb generator;
 
     /**
-     * Contructor
+     * Constructor
      */
     public CreateProjectMicroWeb() {
         this.utils = new FileUtilsProject();
     }
 
     /**
-     * Contructor in this constructor, class attributes are initialized and
+     * Constructor in this constructor, class attributes are initialized and
      * function calls are executed to move Entities and the services and
      * Controllers generation
      *

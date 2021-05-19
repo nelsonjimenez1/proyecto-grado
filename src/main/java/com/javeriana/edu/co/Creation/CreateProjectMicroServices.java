@@ -48,14 +48,14 @@ public class CreateProjectMicroServices {
     public Integer port;
 
     /**
-     * Contructor
+     * Constructor
      */
     public CreateProjectMicroServices() {
 
     }
 
     /**
-     * Contructor 
+     * Constructor 
      * In this costructor, class attributes are initialized to be
      * used in this class functions.
      *

@@ -55,13 +55,13 @@ public class Edge {
       return this.label;
     }
     /**
-     * Contructor
+     * Constructor
      */
     public Edge(){
         
     }
     /**
-     * Contructor
+     * Constructor
      * @param idSrc ID Source
      * @param idDest ID Destination
      * @param typeRelation type of the relation

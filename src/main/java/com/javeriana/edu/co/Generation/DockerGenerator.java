@@ -31,7 +31,7 @@ public class DockerGenerator {
     
     public XMLUtils xmlU;
     /**
-     * Contructor
+     * Constructor
      */
     public DockerGenerator(){
         xmlU = new XMLUtils();

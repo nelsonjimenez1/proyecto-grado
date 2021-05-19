@@ -32,7 +32,7 @@ public class PartitionCotroller {
     private int portGeneric;
 
     /**
-     * Contructor
+     * Constructor
      *
      * @param port: port number used for microservices creation
      */
