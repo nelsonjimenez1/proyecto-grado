@@ -33,11 +33,17 @@ public class DockerGeneratorTest {
         ArrayList<String> list = new ArrayList<>();
         list.add("hola");
         list.add("hola2");
-        dockerGenerator.write(new File(path), list);
+        File fileP = new File(path);
+        
+        if(fileP.exists()) {
+            fileP.delete();
+        }
+        
+        dockerGenerator.write(fileP, list);
         boolean sw = true;
         int i = 0;
 
-        try {
+        try {                                    
             File myObj = new File(path);
             Scanner myReader = new Scanner(myObj);
             while (myReader.hasNextLine()) {
